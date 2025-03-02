@@ -1,7 +1,7 @@
 import PocketBase from 'pocketbase';
 
 // Create a single PocketBase instance to use throughout the app
-export const pb = new PocketBase('http://127.0.0.1:8090');
+export const pb = new PocketBase('http://pocketbase:8090');
 
 // Types for our collections
 export interface Book {
