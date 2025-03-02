@@ -1,0 +1,21 @@
+services:
+  pocketbase:
+    image: elestio/pocketbase:latest
+    container_name: pocketbase
+    restart: unless-stopped
+    user: 0:0
+    ports:
+      - "8090:8090"
+    volumes:
+      - ebookshelf:/pb_data
+
+  ebookshelf:
+      image: ebookshelf:latest
+      container_name: ebookshelf
+      restart: unless-stopped
+      ports:
+        - "8091:5173"
+volumes:
+  ebookshelf:
+
+
