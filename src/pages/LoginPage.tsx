@@ -17,13 +17,21 @@ const LoginPage: React.FC = () => {
       setLoading(true);
       setError(null);
       
-      await pb.collection('_superusers').authWithPassword(email, password);
+      console.log("Attempting login with PocketBase URL:", pb.baseUrl);
+      
+      // Add timeout to prevent indefinite hanging
+      const loginPromise = pb.collection('_superusers').authWithPassword(email, password);
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error("Login request timed out")), 10000);
+      });
+      
+      await Promise.race([loginPromise, timeoutPromise]);
       
       // Redirect to admin page if login successful
       navigate('/admin');
-    } catch (err) {
+    } catch (err: any) {
       console.error('Login error:', err);
-      setError('Invalid email or password. Please try again.');
+      setError(err.message || 'Invalid email or password. Please try again.');
     } finally {
       setLoading(false);
     }

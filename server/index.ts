@@ -22,7 +22,7 @@ const pb = new PocketBase(
 app.use(express.json());
 app.use(cors());
 
-// Proxy PocketBase requests
+// Update the PocketBase proxy middleware with more detailed options
 app.use('/pb', createProxyMiddleware({
   target: process.env.NODE_ENV === 'production' 
     ? 'http://pocketbase:8090' 
@@ -31,9 +31,30 @@ app.use('/pb', createProxyMiddleware({
   pathRewrite: {
     '^/pb': '' // Remove the /pb prefix when forwarding
   },
-  // Handle websocket connections (important for PocketBase real-time)
-  ws: true,
-  logLevel: 'debug'
+  ws: true, // Enable websocket proxying
+  logLevel: 'debug',
+  // Add additional options to help with debugging
+  onProxyReq: (proxyReq, req, res) => {
+    console.log(`Proxying request to: ${req.method} ${req.url}`);
+    
+    // If the request has a body, properly handle it for the proxy
+    if (req.body) {
+      const bodyData = JSON.stringify(req.body);
+      proxyReq.setHeader('Content-Type', 'application/json');
+      proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
+      proxyReq.write(bodyData);
+    }
+  },
+  onProxyRes: (proxyRes, req, res) => {
+    console.log(`Received response from PocketBase: ${proxyRes.statusCode} for ${req.url}`);
+  },
+  onError: (err, req, res) => {
+    console.error('Proxy error:', err);
+    res.writeHead(500, {
+      'Content-Type': 'text/plain',
+    });
+    res.end('Proxy error: ' + err);
+  }
 }));
 
 // Serve static files from the Vite build output directory

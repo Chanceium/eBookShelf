@@ -15,13 +15,20 @@ const getPocketBaseUrl = () => {
     return 'http://pocketbase:8090';
   }
   
-  // For browser client requests, use the same host as the current page but with /pb path
-  // This allows it to work with reverse proxies
-  return `${window.location.protocol}//${window.location.host}/pb`;
+  // For browser client requests, always use the /pb path
+  return `${window.location.origin}/pb`;
 };
 
-// Create a single PocketBase instance to use throughout the app
-export const pb = new PocketBase(getPocketBaseUrl());
+// Create and configure PocketBase instance
+const pb = new PocketBase(getPocketBaseUrl());
+
+// Set additional options for better error handling
+pb.autoCancellation(false);
+
+// Log the base URL for debugging
+console.log('PocketBase initialized with URL:', pb.baseUrl);
+
+export { pb };
 
 // Types for our collections
 export interface Book {
