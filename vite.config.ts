@@ -7,6 +7,10 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
+  define: {
+    // Define process.env for environment variable access
+    'process.env': process.env
+  },
   server: {
     host: true, // This will make Vite listen on all network interfaces
     proxy: {

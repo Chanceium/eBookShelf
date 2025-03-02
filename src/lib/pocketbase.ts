@@ -1,10 +1,12 @@
 import PocketBase from 'pocketbase';
-import { dev } from '$app/environment';
 
 // Determine the appropriate PocketBase URL
 const getPocketBaseUrl = () => {
+  // Check if we're in development mode
+  const isDev = process.env.NODE_ENV !== 'production';
+  
   // For server-side requests in development, we use localhost
-  if (dev && typeof window === 'undefined') {
+  if (isDev && typeof window === 'undefined') {
     return 'http://localhost:8090';
   }
   
