@@ -15,7 +15,9 @@ services:
       container_name: ebookshelf
       restart: unless-stopped
       ports:
-        - "8091:5173"
+        - "3001:3001"
+      environment:
+      - NODE_ENV=production
 volumes:
   ebookshelf:
 

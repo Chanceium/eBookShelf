@@ -1,6 +1,12 @@
 import express from 'express';
 import cors from 'cors';
 import PocketBase from 'pocketbase';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Get __dirname equivalent in ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -14,6 +20,16 @@ const pb = new PocketBase(
 
 app.use(express.json());
 app.use(cors());
+
+// Serve static files from the Vite build output directory
+if (process.env.NODE_ENV === 'production') {
+  // Path to the Vite build output (adjust if your build outputs to a different location)
+  const distPath = path.resolve(__dirname, '../../dist/client');
+  
+  // Serve static files
+  app.use(express.static(distPath));
+  console.log(`Serving static files from: ${distPath}`);
+}
 
 // Books API endpoints
 app.get('/api/books', async (req, res) => {
@@ -111,6 +127,17 @@ app.get('/api/files/:collection/:id/:filename', async (req, res) => {
     res.status(500).send('Could not serve file');
   }
 });
+
+// Catch-all route to return the main HTML page
+// This should be added AFTER all API routes
+if (process.env.NODE_ENV === 'production') {
+  app.get('*', (req, res) => {
+    // Exclude API routes from being redirected to index.html
+    if (!req.path.startsWith('/api/')) {
+      res.sendFile(path.resolve(__dirname, '../../dist/client/index.html'));
+    }
+  });
+}
 
 app.listen(port, () => {
   console.log(`API server running on port ${port}`);

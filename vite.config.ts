@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import path from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -10,6 +11,9 @@ export default defineConfig({
   define: {
     // Define process.env for environment variable access
     'process.env': process.env
+  },
+  build: {
+    outDir: 'dist/client', // Output to dist/client to match the server code
   },
   server: {
     host: true, // This will make Vite listen on all network interfaces
