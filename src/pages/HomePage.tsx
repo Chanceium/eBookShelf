@@ -1,0 +1,228 @@
+import React, { useEffect, useState, useRef } from 'react';
+import { pb } from '../lib/pocketbase';
+import BookCard from '../components/BookCard';
+import CategoryFilter from '../components/CategoryFilter';
+import { Book, Category } from '../lib/pocketbase';
+import { Library, BookOpen, GraduationCap, Quote } from 'lucide-react';
+
+const HomePage: React.FC = () => {
+  const [books, setBooks] = useState<Book[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [booksLoading, setBooksLoading] = useState(true); // Separate loading state for books
+  const [error, setError] = useState<string | null>(null);
+  const isInitialLoad = useRef(true);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  // Fetch categories only once when the component mounts
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const categoriesData = await pb.collection('categories').getFullList<Category>({
+          $cancelKey: `categories-${Date.now()}`,
+        });
+        setCategories(categoriesData);
+      } catch (err: any) {
+        console.error('Error fetching categories:', err);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  // Fetch books whenever the selected category changes
+  useEffect(() => {
+    const fetchBooks = async () => {
+      try {
+        // Only update booksLoading for category changes, not initial load
+        if (!isInitialLoad.current) {
+          setBooksLoading(true);
+        } else {
+          setLoading(true);
+        }
+        
+        // Cancel any ongoing requests
+        if (abortControllerRef.current) {
+          abortControllerRef.current.abort();
+        }
+        
+        // Create a new abort controller for this request
+        abortControllerRef.current = new AbortController();
+        
+        // Fetch books with filter if category is selected
+        let booksRequest;
+        if (selectedCategory) {
+          booksRequest = pb.collection('books').getFullList<Book>({
+            filter: `category = "${selectedCategory}"`,
+            sort: '-created',
+            $cancelKey: `books-${selectedCategory}-${Date.now()}`, // Unique cancel key
+          });
+        } else {
+          booksRequest = pb.collection('books').getFullList<Book>({
+            sort: '-created',
+            $cancelKey: `books-all-${Date.now()}`, // Unique cancel key
+          });
+        }
+        
+        const booksData = await booksRequest;
+        setBooks(booksData);
+        setError(null); // Clear any previous errors
+        
+      } catch (err: any) {
+        console.error('Error fetching books:', err);
+        
+        // Only set error if it's not a cancellation
+        if (!err.isAbort) {
+          setError('Failed to load books. Please try again later.');
+        }
+      } finally {
+        // No longer initial load
+        isInitialLoad.current = false;
+        setLoading(false);
+        setBooksLoading(false);
+      }
+    };
+
+    fetchBooks();
+    
+    // Cleanup function
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, [selectedCategory]);
+
+  const handleCategorySelect = (categoryId: string | null) => {
+    // Prevent page refresh by using React state
+    setSelectedCategory(categoryId);
+  };
+
+  // Only show error if it's not the initial load
+  const shouldShowError = error && !loading && !booksLoading && !isInitialLoad.current;
+  
+  return (
+    <div>
+      {/* Hero Section */}
+      <div className="bg-gradient-to-r from-blue-800 to-indigo-900 text-white">
+        <div className="container mx-auto px-4 py-16">
+          <div className="flex flex-col lg:flex-row items-center">
+            <div className="lg:w-1/2 mb-8 lg:mb-0 order-2 lg:order-1">
+              <div className="flex items-center mb-4">
+                <GraduationCap size={40} className="mr-3 text-yellow-300" />
+                <h1 className="text-4xl md:text-5xl font-bold">Felix Carapaica</h1>
+              </div>
+              <h2 className="text-2xl font-semibold mb-6 text-blue-200">Instructor & Educator</h2>
+              
+              <div className="mb-8 pl-4 border-l-4 border-yellow-400">
+                <Quote size={24} className="text-yellow-300 mb-2" />
+                <p className="text-xl italic text-blue-100">
+                  "Learning by doing: If you do it, then you know it"
+                </p>
+                <p className="text-right mt-2 text-blue-200 font-medium">— Felix Carapaica</p>
+              </div>
+              
+              <p className="text-lg mb-6 text-blue-100">
+                Welcome to my personal collection of educational resources and literature. 
+                These carefully curated books represent years of teaching experience and are designed to inspire and educate.
+              </p>
+              
+              <div className="flex items-center">
+                <BookOpen size={20} className="mr-2 text-yellow-300" />
+                <span className="text-blue-200 font-medium">
+                  {books.length} {books.length === 1 ? 'book' : 'books'} available in the collection
+                </span>
+              </div>
+            </div>
+            <div className="lg:w-1/2 flex justify-center order-1 lg:order-2">
+              <div className="relative">
+                <div className="w-64 h-64 md:w-80 md:h-80 rounded-lg overflow-hidden border-4 border-white shadow-2xl transform rotate-3">
+                  <img 
+                    src="/felix.jpg" 
+                    alt="Felix Carapaica" 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="absolute -bottom-4 -right-4 bg-yellow-400 text-blue-900 rounded-lg py-2 px-4 shadow-lg transform rotate-3">
+                  <p className="font-bold text-sm">25+ Years in Education</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-4 py-8">
+        <CategoryFilter 
+          categories={categories} 
+          selectedCategory={selectedCategory} 
+          onSelectCategory={handleCategorySelect} 
+        />
+        
+        {/* Show loading only for the books section */}
+        {booksLoading && !isInitialLoad.current && (
+          <div className="flex h-64 items-center justify-center">
+            <div className="text-center">
+              <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600 mx-auto"></div>
+              <p className="text-gray-600">Loading books...</p>
+            </div>
+          </div>
+        )}
+        
+        {/* Show initial loading for the entire page */}
+        {loading && isInitialLoad.current && (
+          <div className="flex h-64 items-center justify-center">
+            <div className="text-center">
+              <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600 mx-auto"></div>
+              <p className="text-gray-600">Loading books...</p>
+            </div>
+          </div>
+        )}
+        
+        {shouldShowError && (
+          <div className="rounded-lg bg-red-50 p-4 text-center text-red-800">
+            <p>{error}</p>
+            <button 
+              onClick={() => {
+                setBooksLoading(true);
+                setTimeout(() => {
+                  const currentCategory = selectedCategory;
+                  setSelectedCategory(null);
+                  setTimeout(() => setSelectedCategory(currentCategory), 10);
+                }, 100);
+              }} 
+              className="mt-2 rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700"
+            >
+              Retry
+            </button>
+          </div>
+        )}
+        
+        {!loading && !booksLoading && !shouldShowError && (
+          <>
+            {books.length > 0 ? (
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                {books.map((book) => (
+                  <BookCard key={book.id} book={book} />
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center rounded-lg bg-gray-50 p-12 text-center">
+                <Library size={64} className="mb-4 text-gray-400" />
+                <h3 className="mb-2 text-xl font-semibold text-gray-700">No books found</h3>
+                <p className="text-gray-500">
+                  {selectedCategory 
+                    ? "There are no books in this category yet." 
+                    : "Your library is empty. Add some books to get started!"}
+                </p>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default HomePage;
