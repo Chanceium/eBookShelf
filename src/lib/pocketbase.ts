@@ -15,9 +15,9 @@ const getPocketBaseUrl = () => {
     return 'http://pocketbase:8090';
   }
   
-  // This is a fallback for any remaining client-side usage
-  // Eventually, all direct PocketBase calls should be on the server
-  return `${window.location.protocol}//${window.location.hostname}:8090`;
+  // For browser client requests, use the same host as the current page but with /pb path
+  // This allows it to work with reverse proxies
+  return `${window.location.protocol}//${window.location.host}/pb`;
 };
 
 // Create a single PocketBase instance to use throughout the app

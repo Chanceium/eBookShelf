@@ -3,6 +3,7 @@ import cors from 'cors';
 import PocketBase from 'pocketbase';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { createProxyMiddleware } from 'http-proxy-middleware';
 
 // Get __dirname equivalent in ESM
 const __filename = fileURLToPath(import.meta.url);
@@ -20,6 +21,20 @@ const pb = new PocketBase(
 
 app.use(express.json());
 app.use(cors());
+
+// Proxy PocketBase requests
+app.use('/pb', createProxyMiddleware({
+  target: process.env.NODE_ENV === 'production' 
+    ? 'http://pocketbase:8090' 
+    : 'http://localhost:8090',
+  changeOrigin: true,
+  pathRewrite: {
+    '^/pb': '' // Remove the /pb prefix when forwarding
+  },
+  // Handle websocket connections (important for PocketBase real-time)
+  ws: true,
+  logLevel: 'debug'
+}));
 
 // Serve static files from the Vite build output directory
 if (process.env.NODE_ENV === 'production') {
