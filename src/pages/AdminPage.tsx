@@ -232,8 +232,8 @@ const AdminPage: React.FC = () => {
           
           // Open and send the request
           const url = editMode && editBookId
-            ? `${pb.baseUrl}/api/collections/books/records/${editBookId}`
-            : `${pb.baseUrl}/api/collections/books/records`;
+            ? `/pb/api/collections/books/records/${editBookId}`
+            : `/pb/api/collections/books/records`;
           
           xhr.open(editMode && editBookId ? 'PATCH' : 'POST', url, true);
           

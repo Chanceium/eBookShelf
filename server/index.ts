@@ -22,7 +22,7 @@ const pb = new PocketBase(
 app.use(express.json());
 app.use(cors());
 
-// Update the PocketBase proxy middleware with more detailed options
+// Update the PocketBase proxy middleware with more detailed options for file uploads
 app.use('/pb', createProxyMiddleware({
   target: process.env.NODE_ENV === 'production' 
     ? 'http://pocketbase:8090' 
@@ -33,18 +33,27 @@ app.use('/pb', createProxyMiddleware({
   },
   ws: true, // Enable websocket proxying
   logLevel: 'debug',
-  // Add additional options to help with debugging
+  // Important settings for file uploads
   onProxyReq: (proxyReq, req, res) => {
-    console.log(`Proxying request to: ${req.method} ${req.url}`);
+    console.log(`Proxying request to PocketBase: ${req.method} ${req.url}`);
     
-    // If the request has a body, properly handle it for the proxy
-    if (req.body) {
-      const bodyData = JSON.stringify(req.body);
-      proxyReq.setHeader('Content-Type', 'application/json');
-      proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
-      proxyReq.write(bodyData);
+    // Don't modify the body for multipart/form-data (file uploads)
+    // This is critical - the http-proxy-middleware tries to modify the body
+    // for JSON, but should leave multipart/form-data alone
+    if (!req.headers['content-type']?.includes('multipart/form-data')) {
+      if (req.body) {
+        const bodyData = JSON.stringify(req.body);
+        proxyReq.setHeader('Content-Type', 'application/json');
+        proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
+        proxyReq.write(bodyData);
+      }
     }
   },
+  // Increase timeout limits for large file uploads
+  proxyTimeout: 30 * 60 * 1000, // 30 minutes
+  timeout: 30 * 60 * 1000,     // 30 minutes
+  // Configure proxy to handle large file uploads
+  maxBodyLength: 1024 * 1024 * 1024 * 2, // 2GB limit
   onProxyRes: (proxyRes, req, res) => {
     console.log(`Received response from PocketBase: ${proxyRes.statusCode} for ${req.url}`);
   },
@@ -161,6 +170,42 @@ app.get('/api/files/:collection/:id/:filename', async (req, res) => {
   } catch (err) {
     console.error('Error serving file:', err);
     res.status(500).send('Could not serve file');
+  }
+});
+
+// Add this API endpoint for file access
+app.get('/api/files/:collectionId/:recordId/:fileName', async (req, res) => {
+  try {
+    const { collectionId, recordId, fileName } = req.params;
+    
+    // Use PocketBase's file URL format
+    const targetUrl = process.env.NODE_ENV === 'production'
+      ? `http://pocketbase:8090/api/files/${collectionId}/${recordId}/${fileName}`
+      : `http://localhost:8090/api/files/${collectionId}/${recordId}/${fileName}`;
+    
+    console.log(`Forwarding file request to: ${targetUrl}`);
+    
+    // Create a proxy for this specific request
+    const fileProxy = createProxyMiddleware({
+      target: process.env.NODE_ENV === 'production' 
+        ? 'http://pocketbase:8090' 
+        : 'http://localhost:8090',
+      changeOrigin: true,
+      pathRewrite: {
+        [`^/api/files/${collectionId}/${recordId}/${fileName}`]: `/api/files/${collectionId}/${recordId}/${fileName}`
+      }
+    });
+    
+    // Use the proxy for this request only
+    fileProxy(req, res, (err) => {
+      if (err) {
+        console.error('File proxy error:', err);
+        res.status(500).send('Error retrieving file');
+      }
+    });
+  } catch (error) {
+    console.error('Error proxying file:', error);
+    res.status(500).send('Error processing file request');
   }
 });
 
