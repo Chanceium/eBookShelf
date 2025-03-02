@@ -1,77 +1,198 @@
-{
-  "collections": [
-    {
-      "name": "books",
-      "type": "base",
-      "schema": [
-        {
-          "name": "title",
-          "type": "text",
-          "required": true
-        },
-        {
-          "name": "author",
-          "type": "text",
-          "required": true
-        },
-        {
-          "name": "description",
-          "type": "text",
-          "required": true
-        },
-        {
-          "name": "category",
-          "type": "relation",
-          "required": true,
-          "options": {
-            "collectionId": "categories",
-            "cascadeDelete": false
-          }
-        },
-        {
-          "name": "coverImage",
-          "type": "file",
-          "required": true,
-          "options": {
-            "maxSelect": 1,
-            "maxSize": 5242880,
-            "mimeTypes": [
-              "image/jpeg",
-              "image/png",
-              "image/webp",
-              "image/gif"
-            ],
-            "thumbs": ["100x100"]
-          }
-        },
-        {
-          "name": "pdfFile",
-          "type": "file",
-          "required": true,
-          "options": {
-            "maxSelect": 1,
-            "maxSize": 10485760,
-            "mimeTypes": [
-              "application/pdf"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "categories",
-      "type": "base",
-      "schema": [
-        {
-          "name": "name",
-          "type": "text",
-          "required": true,
-          "options": {
-            "min": 2,
-            "max": 50
-          }
-        }
-      ]
-    }
-  ]
-}
+[
+  {
+    "id": "pbc_1289382847",
+    "listRule": "",
+    "viewRule": "",
+    "createRule": "",
+    "updateRule": "",
+    "deleteRule": "",
+    "name": "books",
+    "type": "base",
+    "fields": [
+      {
+        "autogeneratePattern": "[a-z0-9]{15}",
+        "hidden": false,
+        "id": "text3208210256",
+        "max": 15,
+        "min": 15,
+        "name": "id",
+        "pattern": "^[a-z0-9]+$",
+        "presentable": false,
+        "primaryKey": true,
+        "required": true,
+        "system": true,
+        "type": "text"
+      },
+      {
+        "autogeneratePattern": "",
+        "hidden": false,
+        "id": "text724990059",
+        "max": 0,
+        "min": 0,
+        "name": "title",
+        "pattern": "",
+        "presentable": false,
+        "primaryKey": false,
+        "required": false,
+        "system": false,
+        "type": "text"
+      },
+      {
+        "autogeneratePattern": "",
+        "hidden": false,
+        "id": "text3182418120",
+        "max": 0,
+        "min": 0,
+        "name": "author",
+        "pattern": "",
+        "presentable": false,
+        "primaryKey": false,
+        "required": false,
+        "system": false,
+        "type": "text"
+      },
+      {
+        "autogeneratePattern": "",
+        "hidden": false,
+        "id": "text1843675174",
+        "max": 0,
+        "min": 0,
+        "name": "description",
+        "pattern": "",
+        "presentable": false,
+        "primaryKey": false,
+        "required": false,
+        "system": false,
+        "type": "text"
+      },
+      {
+        "autogeneratePattern": "",
+        "hidden": false,
+        "id": "text105650625",
+        "max": 0,
+        "min": 0,
+        "name": "category",
+        "pattern": "",
+        "presentable": false,
+        "primaryKey": false,
+        "required": false,
+        "system": false,
+        "type": "text"
+      },
+      {
+        "hidden": false,
+        "id": "file4193945286",
+        "maxSelect": 1,
+        "maxSize": 1000000000,
+        "mimeTypes": [
+          "application/pdf"
+        ],
+        "name": "pdfFile",
+        "presentable": false,
+        "protected": false,
+        "required": false,
+        "system": false,
+        "thumbs": [],
+        "type": "file"
+      },
+      {
+        "hidden": false,
+        "id": "file1829049001",
+        "maxSelect": 1,
+        "maxSize": 1000000000,
+        "mimeTypes": [],
+        "name": "coverImage",
+        "presentable": false,
+        "protected": false,
+        "required": false,
+        "system": false,
+        "thumbs": [],
+        "type": "file"
+      },
+      {
+        "hidden": false,
+        "id": "autodate2990389176",
+        "name": "created",
+        "onCreate": true,
+        "onUpdate": false,
+        "presentable": false,
+        "system": false,
+        "type": "autodate"
+      },
+      {
+        "hidden": false,
+        "id": "autodate3332085495",
+        "name": "updated",
+        "onCreate": true,
+        "onUpdate": true,
+        "presentable": false,
+        "system": false,
+        "type": "autodate"
+      }
+    ],
+    "indexes": [],
+    "system": false
+  },
+  {
+    "id": "pbc_3212059534",
+    "listRule": "",
+    "viewRule": "",
+    "createRule": "",
+    "updateRule": "",
+    "deleteRule": "",
+    "name": "categories",
+    "type": "base",
+    "fields": [
+      {
+        "autogeneratePattern": "[a-z0-9]{15}",
+        "hidden": false,
+        "id": "text3208210256",
+        "max": 15,
+        "min": 15,
+        "name": "id",
+        "pattern": "^[a-z0-9]+$",
+        "presentable": false,
+        "primaryKey": true,
+        "required": true,
+        "system": true,
+        "type": "text"
+      },
+      {
+        "autogeneratePattern": "",
+        "hidden": false,
+        "id": "text1579384326",
+        "max": 0,
+        "min": 0,
+        "name": "name",
+        "pattern": "",
+        "presentable": false,
+        "primaryKey": false,
+        "required": false,
+        "system": false,
+        "type": "text"
+      },
+      {
+        "hidden": false,
+        "id": "autodate2990389176",
+        "name": "created",
+        "onCreate": true,
+        "onUpdate": false,
+        "presentable": false,
+        "system": false,
+        "type": "autodate"
+      },
+      {
+        "hidden": false,
+        "id": "autodate3332085495",
+        "name": "updated",
+        "onCreate": true,
+        "onUpdate": true,
+        "presentable": false,
+        "system": false,
+        "type": "autodate"
+      }
+    ],
+    "indexes": [],
+    "system": false
+  }
+]
