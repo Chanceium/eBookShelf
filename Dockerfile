@@ -25,10 +25,11 @@ WORKDIR /app
 
 # Copy only the built assets and server files from the build stage
 COPY --from=build /app/dist ./dist
-COPY --from=build /app/package*.json ./
+COPY --from=build /app/dist/server ./dist/server
+COPY --from=build /app/package.json ./
 
 # Install only production dependencies
-RUN npm ci --omit=dev
+RUN npm install --omit=dev --no-package-lock
 
 # Expose the port the Express server will run on
 EXPOSE 3001
