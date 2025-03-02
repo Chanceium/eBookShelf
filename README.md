@@ -21,7 +21,7 @@ A self-hosted platform for managing and reading your eBook collection, built wit
 
 ## Getting Started
 
-### Option 1: Docker Deployment (Recommended)
+### Docker Deployment (Recommended)
 
 1. Clone the repository.
 2. Make sure you have Docker and Docker Compose installed.
