@@ -52,8 +52,6 @@ app.use('/pb', createProxyMiddleware({
   // Increase timeout limits for large file uploads
   proxyTimeout: 30 * 60 * 1000, // 30 minutes
   timeout: 30 * 60 * 1000,     // 30 minutes
-  // Configure proxy to handle large file uploads
-  maxBodyLength: 1024 * 1024 * 1024 * 2, // 2GB limit
   onProxyRes: (proxyRes, req, res) => {
     console.log(`Received response from PocketBase: ${proxyRes.statusCode} for ${req.url}`);
   },
