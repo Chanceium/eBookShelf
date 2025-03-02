@@ -1,23 +1,40 @@
-# Use an official Node.js runtime as a parent image
-FROM node:20-slim
+# Build stage for React app
+FROM node:20-slim AS build
 
-# Set the working directory in the container
+# Set the working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json
+# Copy package files and install dependencies
 COPY package*.json ./
-
-# Install dependencies
 RUN npm install
 
-# Copy the current directory contents into the container at /app
+# Copy all project files
 COPY . .
 
-# Make port 3000 available to the world outside this container
-EXPOSE 3000
+# Build the React application
+RUN npm run build
 
-# Define environment variable
-ENV NODE_ENV production
+# Build the server TypeScript files
+RUN npm run build:server
 
-# Run the application when the container launches
-CMD ["npm", "start"]
+# Production stage
+FROM node:20-slim
+
+# Set working directory
+WORKDIR /app
+
+# Copy only the built assets and server files from the build stage
+COPY --from=build /app/dist ./dist
+COPY --from=build /app/package*.json ./
+
+# Install only production dependencies
+RUN npm ci --omit=dev
+
+# Expose the port the Express server will run on
+EXPOSE 3001
+
+# Set production environment
+ENV NODE_ENV=production
+
+# Run the Express server which will serve both the API and static files
+CMD ["npm", "run", "start:prod"]

@@ -1,7 +1,25 @@
 import PocketBase from 'pocketbase';
+import { dev } from '$app/environment';
+
+// Determine the appropriate PocketBase URL
+const getPocketBaseUrl = () => {
+  // For server-side requests in development, we use localhost
+  if (dev && typeof window === 'undefined') {
+    return 'http://localhost:8090';
+  }
+  
+  // For server-side requests in production, we use the Docker service name
+  if (typeof window === 'undefined') {
+    return 'http://pocketbase:8090';
+  }
+  
+  // This is a fallback for any remaining client-side usage
+  // Eventually, all direct PocketBase calls should be on the server
+  return `${window.location.protocol}//${window.location.hostname}:8090`;
+};
 
 // Create a single PocketBase instance to use throughout the app
-export const pb = new PocketBase('http://pocketbase:8090');
+export const pb = new PocketBase(getPocketBaseUrl());
 
 // Types for our collections
 export interface Book {
@@ -23,7 +41,8 @@ export interface Category {
   updated: string;
 }
 
-// Helper function to get the file URL
+// Helper function to get the file URL - now returns API endpoint path instead of direct PB URL
 export const getFileUrl = (collectionId: string, recordId: string, fileName: string) => {
-  return `${pb.baseUrl}/api/files/${collectionId}/${recordId}/${fileName}`;
+  // Use our own API endpoint instead of direct PocketBase URL
+  return `/api/files/${collectionId}/${recordId}/${fileName}`;
 };

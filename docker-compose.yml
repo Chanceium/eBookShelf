@@ -9,6 +9,7 @@ services:
     volumes:
       - ebookshelf:/pb_data
 
+
   ebookshelf:
       image: ebookshelf:latest
       container_name: ebookshelf
