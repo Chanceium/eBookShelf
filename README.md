@@ -12,69 +12,30 @@ A self-hosted platform for managing and reading your eBook collection, built wit
 
 ## Tech Stack
 
-- **Frontend**: React, TypeScript, Tailwind CSS
-- **Backend**: PocketBase (embedded database and backend)
+- **Frontend**: React, TypeScript, Tailwind CSS, Vite
+- **Backend**: Express server with PocketBase
+- **Database**: PocketBase (embedded database and backend)
 - **PDF Viewer**: react-pdf
 - **Routing**: React Router
 - **Icons**: Lucide React
 
 ## Getting Started
 
-### Prerequisites
+### Option 1: Docker Deployment (Recommended)
 
-- Node.js (v16 or higher)
-- PocketBase executable (download from [pocketbase.io](https://pocketbase.io/))
+1. Clone the repository.
+2. Make sure you have Docker and Docker Compose installed.
+3. Build and start the containers using Docker Compose.
 
-### Setup
+   This will:
+   - Start PocketBase container on port 8090 (external and internal)
+   - Build and start the eBookShelf application on port 8091 (external)
 
-1. Clone the repository
-2. Install dependencies:
-   ```
-   npm install
-   ```
-3. Download PocketBase from [pocketbase.io](https://pocketbase.io/docs/) and place the executable in the project root
+4. Check the PocketBase logs and look for the initial admin setup token. Go to the provided link looks something like `http://your-server-ip:8090/_/###################` and use this URL to create your first admin user.
+5. After logging in to the PocketBase admin UI, import the schema:
+   - Navigate to Settings > Import Collections
+   - Select "Load from JSON" and choose the `pb_schema.json` file from the `/pocketbase` directory
+   - Check the "Merge collections" option
+   - Click "Review" and confirm the import
 
-4. Start PocketBase:
-   ```
-   ./pocketbase serve
-   ```
-   This will start PocketBase on http://127.0.0.1:8090
-
-5. Open the PocketBase admin UI at http://127.0.0.1:8090/_/ and create an admin account
-
-6. Import the schema from `pb_schema.json` or create the collections manually:
-   - `books` collection with fields: title, author, description, category (relation), coverImage (file), pdfFile (file)
-   - `categories` collection with field: name
-
-7. Start the development server:
-   ```
-   npm run dev
-   ```
-
-8. Visit http://localhost:5173 to see the application
-
-## Usage
-
-### User Interface
-
-- Browse books on the home page
-- Filter books by category
-- Click on a book to read it in the built-in PDF viewer
-
-### Admin Interface
-
-1. Log in at `/login` with your PocketBase admin credentials
-2. Access the admin dashboard at `/admin`
-3. Add, edit, or delete categories
-4. Upload new books with metadata, cover images, and PDF files
-
-## Project Structure
-
-- `/src/components` - Reusable UI components
-- `/src/pages` - Page components for different routes
-- `/src/lib` - Utility functions and PocketBase client
-- `/public` - Static assets
-
-## License
-
-This project is licensed under the MIT License.
+6. Access your eBookShelf application at `http://your-server-ip:8091`
