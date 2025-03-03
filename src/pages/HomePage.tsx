@@ -166,7 +166,7 @@ const HomePage: React.FC = () => {
                 </div>
               </div>
               <div className="lg:w-1/2 flex justify-center order-1 lg:order-2">
-                <div className="relative">
+                <div className="relative mt-4 mb-12 sm:mb-8 lg:mb-0">
                   <div className="w-64 h-64 md:w-80 md:h-80 rounded-lg overflow-hidden border-4 border-white shadow-2xl transform rotate-3">
                     {siteSettings?.hero_photo ? (
                       <img 
@@ -182,8 +182,8 @@ const HomePage: React.FC = () => {
                       />
                     )}
                   </div>
-                  <div className="absolute -bottom-4 -right-4 bg-yellow-400 text-blue-900 rounded-lg py-2 px-4 shadow-lg transform rotate-3">
-                    <p className="font-bold text-sm">
+                  <div className="absolute -bottom-3 sm:-bottom-4 -right-2 sm:-right-4 bg-yellow-400 text-blue-900 rounded-lg py-1 sm:py-2 px-3 sm:px-4 shadow-lg transform rotate-3">
+                    <p className="font-bold text-xs sm:text-sm">
                       {siteSettings?.hero_caption || "Digital Library"}
                     </p>
                   </div>
