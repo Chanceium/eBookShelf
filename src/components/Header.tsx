@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { BookOpen, Settings, LogOut, User } from 'lucide-react';
+import { Settings, LogOut, User } from 'lucide-react';
 import { pb } from '../lib/pocketbase';
 
 const Header: React.FC = () => {
@@ -17,7 +17,7 @@ const Header: React.FC = () => {
       <div className="container mx-auto flex items-center justify-between px-4 py-3">
         <Link to="/" className="flex items-center gap-2 text-xl font-bold text-blue-600">
           <img 
-            src="public/logo.png" 
+            src="logo.png" 
             alt="eBookShelf Logo" 
             width={24} 
             height={24} 
