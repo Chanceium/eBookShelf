@@ -50,6 +50,19 @@ export interface Category {
   updated: string;
 }
 
+export interface SiteSettings {
+  id: string;
+  site_title: string;
+  site_description: string;
+  subtitle: string;
+  quote: string;
+  quote_name: string;
+  hero_photo: File;
+  hero_caption: string;
+  created: string;
+  updated: string;
+}
+
 // Helper function to get the file URL - now returns API endpoint path instead of direct PB URL
 export const getFileUrl = (collectionId: string, recordId: string, fileName: string) => {
   // Use our own API endpoint instead of direct PocketBase URL
