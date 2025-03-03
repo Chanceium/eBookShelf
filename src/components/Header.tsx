@@ -16,7 +16,13 @@ const Header: React.FC = () => {
     <header className="bg-white shadow-sm">
       <div className="container mx-auto flex items-center justify-between px-4 py-3">
         <Link to="/" className="flex items-center gap-2 text-xl font-bold text-blue-600">
-          <BookOpen size={24} className="hidden sm:block" />
+          <img 
+            src="public/logo.png" 
+            alt="eBookShelf Logo" 
+            width={24} 
+            height={24} 
+            className="hidden sm:block" 
+          />
           <span>eBookShelf</span>
         </Link>
         
