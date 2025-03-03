@@ -16,6 +16,7 @@ const HomePage: React.FC = () => {
   const isInitialLoad = useRef(true);
   const abortControllerRef = useRef<AbortController | null>(null);
   const [heroLoading, setHeroLoading] = useState(true);
+  const [animateBooks, setAnimateBooks] = useState(false);
 
   // Fetch site settings and categories when the component mounts
   useEffect(() => {
@@ -108,6 +109,22 @@ const HomePage: React.FC = () => {
       }
     };
   }, [selectedCategory]);
+
+  // Add this new effect to handle animation timing
+  useEffect(() => {
+    // When books finish loading, trigger animation
+    if (!booksLoading && !loading) {
+      // Reset animation state first
+      setAnimateBooks(false);
+      
+      // Small delay before starting animation
+      const timer = setTimeout(() => {
+        setAnimateBooks(true);
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [booksLoading, loading, books]);
 
   const handleCategorySelect = (categoryId: string | null) => {
     // Prevent page refresh by using React state
@@ -244,12 +261,25 @@ const HomePage: React.FC = () => {
           <>
             {books.length > 0 ? (
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                {books.map((book) => (
-                  <BookCard key={book.id} book={book} />
+                {books.map((book, index) => (
+                  <div 
+                    key={book.id}
+                    className={`transform transition-all duration-500 ${
+                      animateBooks 
+                        ? 'opacity-100 translate-y-0'
+                        : 'opacity-0 translate-y-8'
+                    }`}
+                    style={{ 
+                      transitionDelay: animateBooks ? `${index * 100}ms` : '0ms' 
+                    }}
+                  >
+                    <BookCard book={book} />
+                  </div>
                 ))}
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center rounded-lg bg-gray-50 p-12 text-center">
+              <div className={`flex flex-col items-center justify-center rounded-lg bg-gray-50 p-12 text-center
+                              transition-all duration-500 ${animateBooks ? 'opacity-100' : 'opacity-0'}`}>
                 <Library size={64} className="mb-4 text-gray-400" />
                 <h3 className="mb-2 text-xl font-semibold text-gray-700">No books found</h3>
                 <p className="text-gray-500">
