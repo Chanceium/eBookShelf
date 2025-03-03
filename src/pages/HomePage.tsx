@@ -218,79 +218,86 @@ const HomePage: React.FC = () => {
           onSelectCategory={handleCategorySelect} 
         />
         
-        {/* Show loading only for the books section */}
-        {booksLoading && !isInitialLoad.current && (
-          <div className="flex h-64 items-center justify-center">
-            <div className="text-center">
-              <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600 mx-auto"></div>
-              <p className="text-gray-600">Loading books...</p>
+        {/* Replace the loading and content sections with this improved version */}
+        <div className="relative min-h-[16rem]">
+          {/* Loading spinner with absolute positioning */}
+          {(booksLoading && !isInitialLoad.current) && (
+            <div className="absolute inset-0 flex items-center justify-center z-10">
+              <div className="text-center">
+                <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600 mx-auto"></div>
+                <p className="text-gray-600">Loading books...</p>
+              </div>
             </div>
-          </div>
-        )}
-        
-        {/* Show initial loading for the entire page */}
-        {loading && isInitialLoad.current && (
-          <div className="flex h-64 items-center justify-center">
-            <div className="text-center">
-              <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600 mx-auto"></div>
-              <p className="text-gray-600">Loading books...</p>
+          )}
+          
+          {/* Initial loading with absolute positioning */}
+          {loading && isInitialLoad.current && (
+            <div className="absolute inset-0 flex items-center justify-center z-10">
+              <div className="text-center">
+                <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600 mx-auto"></div>
+                <p className="text-gray-600">Loading books...</p>
+              </div>
             </div>
-          </div>
-        )}
-        
-        {shouldShowError && (
-          <div className="rounded-lg bg-red-50 p-4 text-center text-red-800">
-            <p>{error}</p>
-            <button 
-              onClick={() => {
-                setBooksLoading(true);
-                setTimeout(() => {
-                  const currentCategory = selectedCategory;
-                  setSelectedCategory(null);
-                  setTimeout(() => setSelectedCategory(currentCategory), 10);
-                }, 100);
-              }} 
-              className="mt-2 rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700"
-            >
-              Retry
-            </button>
-          </div>
-        )}
-        
-        {!loading && !booksLoading && !shouldShowError && (
-          <>
-            {books.length > 0 ? (
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                {books.map((book, index) => (
-                  <div 
-                    key={book.id}
-                    className={`transform transition-all duration-500 ${
-                      animateBooks 
-                        ? 'opacity-100 translate-y-0'
-                        : 'opacity-0 translate-y-8'
-                    }`}
-                    style={{ 
-                      transitionDelay: animateBooks ? `${index * 100}ms` : '0ms' 
-                    }}
-                  >
-                    <BookCard book={book} />
+          )}
+          
+          {/* Error message */}
+          {shouldShowError && (
+            <div className="rounded-lg bg-red-50 p-4 text-center text-red-800">
+              <p>{error}</p>
+              <button 
+                onClick={() => {
+                  setBooksLoading(true);
+                  setTimeout(() => {
+                    const currentCategory = selectedCategory;
+                    setSelectedCategory(null);
+                    setTimeout(() => setSelectedCategory(currentCategory), 10);
+                  }, 100);
+                }} 
+                className="mt-2 rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700"
+              >
+                Retry
+              </button>
+            </div>
+          )}
+          
+          {/* Content section with improved transition */}
+          <div className={`transition-opacity duration-300 ${(booksLoading || loading) ? 'opacity-0' : 'opacity-100'}`}>
+            {!shouldShowError && (
+              <>
+                {books.length > 0 ? (
+                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                    {books.map((book, index) => (
+                      <div 
+                        key={book.id}
+                        className={`transform transition-all duration-500 ${
+                          animateBooks 
+                            ? 'opacity-100 translate-y-0'
+                            : 'opacity-0 translate-y-8'
+                        }`}
+                        style={{ 
+                          transitionDelay: animateBooks ? `${index * 100}ms` : '0ms' 
+                        }}
+                      >
+                        <BookCard book={book} />
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className={`flex flex-col items-center justify-center rounded-lg bg-gray-50 p-12 text-center
-                              transition-all duration-500 ${animateBooks ? 'opacity-100' : 'opacity-0'}`}>
-                <Library size={64} className="mb-4 text-gray-400" />
-                <h3 className="mb-2 text-xl font-semibold text-gray-700">No books found</h3>
-                <p className="text-gray-500">
-                  {selectedCategory 
-                    ? "There are no books in this category yet." 
-                    : "Your library is empty. Add some books to get started!"}
-                </p>
-              </div>
+                ) : (
+                  <div className={`flex flex-col items-center justify-center rounded-lg bg-gray-50 p-12 text-center
+                                  transition-all duration-500 ${animateBooks ? 'opacity-100' : 'opacity-0'}`}>
+                    <Library size={64} className="mb-4 text-gray-400" />
+                    <h3 className="mb-2 text-xl font-semibold text-gray-700">No books found</h3>
+                    <p className="text-gray-500">
+                      {selectedCategory 
+                        ? "There are no books in this category yet." 
+                        : "Your library is empty. Add some books to get started!"}
+                    </p>
+                  </div>
+                )}
+              </>
             )}
-          </>
-        )}
+          </div>
+        </div>
       </div>
     </div>
   );
