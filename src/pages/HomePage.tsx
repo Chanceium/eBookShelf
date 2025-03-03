@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { pb } from '../lib/pocketbase';
 import BookCard from '../components/BookCard';
 import CategoryFilter from '../components/CategoryFilter';
-import { Book, Category } from '../lib/pocketbase';
+import { Book, Category, SiteSettings, getFileUrl } from '../lib/pocketbase';
 import { Library, BookOpen, GraduationCap, Quote } from 'lucide-react';
 
 const HomePage: React.FC = () => {
@@ -12,23 +12,34 @@ const HomePage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [booksLoading, setBooksLoading] = useState(true); // Separate loading state for books
   const [error, setError] = useState<string | null>(null);
+  const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null);
   const isInitialLoad = useRef(true);
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  // Fetch categories only once when the component mounts
+  // Fetch site settings and categories when the component mounts
   useEffect(() => {
-    const fetchCategories = async () => {
+    const fetchInitialData = async () => {
       try {
+        // Fetch site settings
+        try {
+          const siteSettingsData = await pb.collection('site_settings').getFirstListItem<SiteSettings>('');
+          setSiteSettings(siteSettingsData);
+        } catch (err) {
+          console.error('Could not fetch site settings:', err);
+          // Continue even if site settings aren't available
+        }
+
+        // Fetch categories
         const categoriesData = await pb.collection('categories').getFullList<Category>({
           $cancelKey: `categories-${Date.now()}`,
         });
         setCategories(categoriesData);
       } catch (err: any) {
-        console.error('Error fetching categories:', err);
+        console.error('Error fetching initial data:', err);
       }
     };
 
-    fetchCategories();
+    fetchInitialData();
   }, []);
 
   // Fetch books whenever the selected category changes
@@ -111,21 +122,26 @@ const HomePage: React.FC = () => {
             <div className="lg:w-1/2 mb-8 lg:mb-0 order-2 lg:order-1">
               <div className="flex items-center mb-4">
                 <GraduationCap size={40} className="mr-3 text-yellow-300" />
-                <h1 className="text-4xl md:text-5xl font-bold">Felix Carapaica</h1>
+                <h1 className="text-4xl md:text-5xl font-bold">
+                  {siteSettings?.site_title || "eBookShelf"}
+                </h1>
               </div>
-              <h2 className="text-2xl font-semibold mb-6 text-blue-200">Instructor & Educator</h2>
+              <h2 className="text-2xl font-semibold mb-6 text-blue-200">
+                {siteSettings?.subtitle || "Digital Library"}
+              </h2>
               
               <div className="mb-8 pl-4 border-l-4 border-yellow-400">
                 <Quote size={24} className="text-yellow-300 mb-2" />
                 <p className="text-xl italic text-blue-100">
-                  "Learning by doing: If you do it, then you know it"
+                  "{siteSettings?.quote || "Learning is a treasure that will follow its owner everywhere"}"
                 </p>
-                <p className="text-right mt-2 text-blue-200 font-medium">— Felix Carapaica</p>
+                <p className="text-right mt-2 text-blue-200 font-medium">
+                  {siteSettings?.quote_name ? `— ${siteSettings.quote_name}` : ""}
+                </p>
               </div>
               
               <p className="text-lg mb-6 text-blue-100">
-                Welcome to my personal collection of educational resources and literature. 
-                These carefully curated books represent years of teaching experience and are designed to inspire and educate.
+                {siteSettings?.site_description || "Welcome to this collection of educational resources and literature."}
               </p>
               
               <div className="flex items-center">
@@ -138,14 +154,24 @@ const HomePage: React.FC = () => {
             <div className="lg:w-1/2 flex justify-center order-1 lg:order-2">
               <div className="relative">
                 <div className="w-64 h-64 md:w-80 md:h-80 rounded-lg overflow-hidden border-4 border-white shadow-2xl transform rotate-3">
-                  <img 
-                    src="/felix.jpg" 
-                    alt="Felix Carapaica" 
-                    className="w-full h-full object-cover"
-                  />
+                  {siteSettings?.hero_photo ? (
+                    <img 
+                      src={getFileUrl('site_settings', siteSettings.id, siteSettings.hero_photo)} 
+                      alt={siteSettings.hero_caption || "Hero image"}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <img 
+                      src="/hero.jpg" 
+                      alt="Default hero image" 
+                      className="w-full h-full object-cover"
+                    />
+                  )}
                 </div>
                 <div className="absolute -bottom-4 -right-4 bg-yellow-400 text-blue-900 rounded-lg py-2 px-4 shadow-lg transform rotate-3">
-                  <p className="font-bold text-sm">25+ Years in Education</p>
+                  <p className="font-bold text-sm">
+                    {siteSettings?.hero_caption || "Digital Library"}
+                  </p>
                 </div>
               </div>
             </div>

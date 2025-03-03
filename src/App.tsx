@@ -20,7 +20,7 @@ function App() {
           </Routes>
         </main>
         <footer className="bg-white py-6 text-center text-sm text-gray-600">
-          <p>© {new Date().getFullYear()} Felix Carapaica's eBookShelf. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} eBookShelf. All rights reserved.</p>
         </footer>
       </div>
     </Router>

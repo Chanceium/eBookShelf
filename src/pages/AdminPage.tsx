@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { pb } from '../lib/pocketbase';
-import { Book, Category, getFileUrl } from '../lib/pocketbase';
-import { Plus, Trash, Edit, BookOpen, FolderPlus, X, Loader2 } from 'lucide-react';
+import { Book, Category, SiteSettings, getFileUrl } from '../lib/pocketbase';
+import { Plus, Trash, Edit, BookOpen, FolderPlus, X, Loader2, Settings } from 'lucide-react';
 
 const AdminPage: React.FC = () => {
   const navigate = useNavigate();
@@ -38,6 +38,19 @@ const AdminPage: React.FC = () => {
   const [retryCount, setRetryCount] = useState(0);
   const MAX_RETRIES = 3;
 
+  // Site Settings state
+  const [showSiteSettingsForm, setShowSiteSettingsForm] = useState(false);
+  const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null);
+  const [siteTitle, setSiteTitle] = useState('');
+  const [siteDescription, setSiteDescription] = useState('');
+  const [siteSubtitle, setSiteSubtitle] = useState('');
+  const [siteQuote, setSiteQuote] = useState('');
+  const [siteQuoteName, setSiteQuoteName] = useState('');
+  const [siteHeroPhoto, setSiteHeroPhoto] = useState<File | null>(null);
+  const [siteHeroCaption, setSiteHeroCaption] = useState('');
+  const [existingHeroPhoto, setExistingHeroPhoto] = useState('');
+  const [savingSettings, setSavingSettings] = useState(false);
+
   useEffect(() => {
     // Check if user is authenticated as admin
     if (!pb.authStore.isValid) {
@@ -58,6 +71,14 @@ const AdminPage: React.FC = () => {
           sort: '-created',
         });
         setBooks(booksData);
+
+        // Fetch site settings - there should be only one record
+        try {
+          const siteSettingsData = await pb.collection('site_settings').getFirstListItem<SiteSettings>('');
+          setSiteSettings(siteSettingsData);
+        } catch (err) {
+          console.log('No site settings found. Will create new on save.');
+        }
       } catch (err) {
         console.error('Error fetching data:', err);
       } finally {
@@ -337,6 +358,71 @@ const AdminPage: React.FC = () => {
     }
   };
 
+  const handleEditSiteSettings = () => {
+    // Populate form with existing settings if available
+    if (siteSettings) {
+      setSiteTitle(siteSettings.site_title || '');
+      setSiteDescription(siteSettings.site_description || '');
+      setSiteSubtitle(siteSettings.subtitle || '');
+      setSiteQuote(siteSettings.quote || '');
+      setSiteQuoteName(siteSettings.quote_name || '');
+      setExistingHeroPhoto(siteSettings.hero_photo || '');
+      setSiteHeroCaption(siteSettings.hero_caption || '');
+    }
+    
+    setShowSiteSettingsForm(true);
+    
+    // Scroll to the form
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleSaveSiteSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      setSavingSettings(true);
+      setFormError(null);
+      
+      // Prepare form data
+      const formData = new FormData();
+      formData.append('site_title', siteTitle);
+      formData.append('site_description', siteDescription);
+      formData.append('subtitle', siteSubtitle);
+      formData.append('quote', siteQuote);
+      formData.append('quote_name', siteQuoteName);
+      formData.append('hero_caption', siteHeroCaption);
+      
+      if (siteHeroPhoto) {
+        formData.append('hero_photo', siteHeroPhoto);
+      }
+      
+      let updatedSettings;
+      
+      if (siteSettings) {
+        // Update existing record
+        updatedSettings = await pb.collection('site_settings').update(siteSettings.id, formData);
+      } else {
+        // Create new record
+        updatedSettings = await pb.collection('site_settings').create(formData);
+      }
+      
+      setSiteSettings(updatedSettings);
+      setShowSiteSettingsForm(false);
+      
+      // Show success message
+      alert('Site settings updated successfully!');
+    } catch (err) {
+      console.error('Error saving site settings:', err);
+      setFormError(`Failed to save site settings: ${err.message || 'Unknown error'}. Please try again.`);
+    } finally {
+      setSavingSettings(false);
+    }
+  };
+
+  const handleCancelSiteSettings = () => {
+    setShowSiteSettingsForm(false);
+  };
+
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
@@ -351,6 +437,221 @@ const AdminPage: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="mb-8 text-3xl font-bold text-gray-800">Admin Dashboard</h1>
+      
+      {/* Site Settings Section */}
+      <div className="mb-12">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-xl font-semibold text-gray-800">Site Settings</h2>
+          <button
+            onClick={handleEditSiteSettings}
+            className="inline-flex items-center rounded-md bg-purple-600 px-4 py-2 text-white hover:bg-purple-700"
+          >
+            <Settings size={16} className="mr-2" />
+            Edit Site Settings
+          </button>
+        </div>
+        
+        {showSiteSettingsForm && (
+          <div className="mb-6 rounded-lg bg-gray-50 p-6">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-lg font-medium text-gray-800">Edit Site Settings</h3>
+              <button 
+                onClick={handleCancelSiteSettings}
+                className="rounded-full p-1 text-gray-500 hover:bg-gray-200 hover:text-gray-700"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            {formError && (
+              <div className="mb-4 rounded-md bg-red-50 p-4 text-sm text-red-800">
+                {formError}
+              </div>
+            )}
+            
+            <form onSubmit={handleSaveSiteSettings}>
+              <div className="mb-4">
+                <label htmlFor="siteTitle" className="mb-1 block text-sm font-medium text-gray-700">
+                  Site Title
+                </label>
+                <input
+                  id="siteTitle"
+                  type="text"
+                  value={siteTitle}
+                  onChange={(e) => setSiteTitle(e.target.value)}
+                  required
+                  className="block w-full rounded-md border border-gray-300 p-2 focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+                />
+              </div>
+              
+              <div className="mb-4">
+                <label htmlFor="siteDescription" className="mb-1 block text-sm font-medium text-gray-700">
+                  Site Description
+                </label>
+                <textarea
+                  id="siteDescription"
+                  value={siteDescription}
+                  onChange={(e) => setSiteDescription(e.target.value)}
+                  required
+                  rows={3}
+                  className="block w-full rounded-md border border-gray-300 p-2 focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+                />
+                <p className="mt-1 text-xs text-gray-500">Used for SEO and social media sharing</p>
+              </div>
+              
+              <div className="mb-4">
+                <label htmlFor="siteSubtitle" className="mb-1 block text-sm font-medium text-gray-700">
+                  Subtitle
+                </label>
+                <input
+                  id="siteSubtitle"
+                  type="text"
+                  value={siteSubtitle}
+                  onChange={(e) => setSiteSubtitle(e.target.value)}
+                  className="block w-full rounded-md border border-gray-300 p-2 focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+                />
+              </div>
+              
+              <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div>
+                  <label htmlFor="siteQuote" className="mb-1 block text-sm font-medium text-gray-700">
+                    Quote
+                  </label>
+                  <textarea
+                    id="siteQuote"
+                    value={siteQuote}
+                    onChange={(e) => setSiteQuote(e.target.value)}
+                    rows={2}
+                    className="block w-full rounded-md border border-gray-300 p-2 focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="siteQuoteName" className="mb-1 block text-sm font-medium text-gray-700">
+                    Quote Attribution
+                  </label>
+                  <input
+                    id="siteQuoteName"
+                    type="text"
+                    value={siteQuoteName}
+                    onChange={(e) => setSiteQuoteName(e.target.value)}
+                    className="block w-full rounded-md border border-gray-300 p-2 focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+              
+              <div className="mb-4">
+                <label htmlFor="siteHeroPhoto" className="mb-1 block text-sm font-medium text-gray-700">
+                  Hero Image
+                </label>
+                {existingHeroPhoto && (
+                  <div className="mb-2 flex items-center">
+                    <div className="mr-4 h-20 w-32 overflow-hidden rounded border">
+                      <img 
+                        src={getFileUrl('site_settings', siteSettings?.id as string, existingHeroPhoto)} 
+                        alt="Current hero" 
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                    <p className="text-sm text-gray-600">Current hero image</p>
+                  </div>
+                )}
+                <input
+                  id="siteHeroPhoto"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setSiteHeroPhoto(e.target.files?.[0] || null)}
+                  className="block w-full rounded-md border border-gray-300 p-2 text-sm text-gray-500 file:mr-4 file:rounded-md file:border-0 file:bg-blue-50 file:py-2 file:px-4 file:text-sm file:font-semibold file:text-blue-700 hover:file:bg-blue-100"
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  {existingHeroPhoto ? "Only select a file if you want to change the current image" : "Recommended: JPG or PNG, 1920x1080px"}
+                </p>
+              </div>
+              
+              <div className="mb-4">
+                <label htmlFor="siteHeroCaption" className="mb-1 block text-sm font-medium text-gray-700">
+                  Hero Caption
+                </label>
+                <input
+                  id="siteHeroCaption"
+                  type="text"
+                  value={siteHeroCaption}
+                  onChange={(e) => setSiteHeroCaption(e.target.value)}
+                  className="block w-full rounded-md border border-gray-300 p-2 focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+                />
+              </div>
+              
+              <div className="flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={handleCancelSiteSettings}
+                  className="rounded-md bg-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-400"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingSettings}
+                  className={`rounded-md px-4 py-2 text-white ${
+                    savingSettings 
+                      ? 'bg-purple-400 cursor-not-allowed' 
+                      : 'bg-purple-600 hover:bg-purple-700'
+                  }`}
+                >
+                  {savingSettings ? (
+                    <span className="flex items-center">
+                      <Loader2 size={16} className="mr-2 animate-spin" />
+                      Saving...
+                    </span>
+                  ) : (
+                    'Save Settings'
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+        
+        {!showSiteSettingsForm && siteSettings && (
+          <div className="overflow-hidden rounded-lg border border-gray-200 shadow-sm">
+            <div className="p-6 bg-white">
+              <dl className="divide-y divide-gray-200">
+                <div className="py-3 grid grid-cols-3 gap-4">
+                  <dt className="text-sm font-medium text-gray-500">Site Title</dt>
+                  <dd className="text-sm text-gray-900 col-span-2">{siteSettings.site_title}</dd>
+                </div>
+                <div className="py-3 grid grid-cols-3 gap-4">
+                  <dt className="text-sm font-medium text-gray-500">Site Description</dt>
+                  <dd className="text-sm text-gray-900 col-span-2">{siteSettings.site_description}</dd>
+                </div>
+                <div className="py-3 grid grid-cols-3 gap-4">
+                  <dt className="text-sm font-medium text-gray-500">Subtitle</dt>
+                  <dd className="text-sm text-gray-900 col-span-2">{siteSettings.subtitle}</dd>
+                </div>
+                <div className="py-3 grid grid-cols-3 gap-4">
+                  <dt className="text-sm font-medium text-gray-500">Quote</dt>
+                  <dd className="text-sm text-gray-900 col-span-2">
+                    {siteSettings.quote && (
+                      <>
+                        <p>"{siteSettings.quote}"</p>
+                        {siteSettings.quote_name && (
+                          <p className="italic mt-1">— {siteSettings.quote_name}</p>
+                        )}
+                      </>
+                    )}
+                  </dd>
+                </div>
+              </dl>
+            </div>
+          </div>
+        )}
+        
+        {!showSiteSettingsForm && !siteSettings && (
+          <div className="rounded-lg bg-gray-50 p-6 text-center">
+            <p className="text-gray-600">No site settings found. Click "Edit Site Settings" to set up your site configuration.</p>
+          </div>
+        )}
+      </div>
       
       <div className="mb-12">
         <div className="mb-4 flex items-center justify-between">
