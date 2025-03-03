@@ -1,6 +1,6 @@
 # eBookShelf - Personal eBook Hosting Platform
 
-A self-hosted platform for managing and reading your eBook collection, built with React, TypeScript, and PocketBase.
+A self-hosted platform for hosting and sharing your personal eBook collection, built with React, TypeScript, and PocketBase.
 
 ## Features
 
