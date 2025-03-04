@@ -17,7 +17,7 @@ A self-hosted platform for organizing, hosting, and sharing your personal eBook 
 ✅ **In-Browser PDF Reader** – Read PDFs directly without downloads  
 ✅ **Admin Dashboard** – Manage books, categories, and users  
 ✅ **Upload Support** – Add PDFs and cover images seamlessly  
-✅ **Secure Authentication** – Admin-only access for management 
+✅ **Secure Authentication** – Admin-only access for management  
 
 ## Tech Stack  
 🖥 **Frontend:** React, TypeScript, Tailwind CSS, Vite  
@@ -60,4 +60,10 @@ volumes:
 - **eBookShelf UI:** [`http://localhost:8091`](http://localhost:8091)  
 
 ## Contributing  
-Contributions and feature suggestions are welcome! Open an issue or PR on [GitHub](https://github.com/chanceium/ebookshelf).  
+Contributions and feature suggestions are welcome! Open an issue or PR on [GitHub](https://github.com/chanceium/ebookshelf).
+
+## Home Dashboard
+![image info](https://raw.githubusercontent.com/Chanceium/eBookShelf/refs/heads/main/public/home.png)
+
+## Admin Dashboard
+![image info](https://raw.githubusercontent.com/Chanceium/eBookShelf/refs/heads/main/public/admin.png)
