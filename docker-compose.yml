@@ -1,6 +1,6 @@
 services:
   pocketbase:
-    image: elestio/pocketbase:latest
+    image: elestio/pocketbase:v0.25.7
     container_name: pocketbase
     restart: unless-stopped
     user: 0:0
@@ -9,16 +9,14 @@ services:
     volumes:
       - ebookshelf:/pb_data
 
-
   ebookshelf:
-      image: ebookshelf:latest
-      container_name: ebookshelf
-      restart: unless-stopped
-      ports:
-        - "8091:3001"
-      environment:
+    image: chanceium/ebookshelf:latest
+    container_name: ebookshelf
+    restart: unless-stopped
+    ports:
+      - "8091:3001"
+    environment:
       - NODE_ENV=production
+
 volumes:
   ebookshelf:
-
-
