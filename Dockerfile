@@ -22,7 +22,8 @@ FROM node:20-slim
 
 # Set working directory
 WORKDIR /app
-
+# Remove existing pb_data if it exists
+RUN rm -rf /pb_data
 # Copy only the built assets and server files from the build stage
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/dist/server ./dist/server
