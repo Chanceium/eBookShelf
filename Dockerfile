@@ -26,7 +26,6 @@ WORKDIR /app
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/dist/server ./dist/server
 COPY --from=build /app/package.json ./
-COPY --from=build /app/pb_data ./pb_data
 
 # Install only production dependencies
 RUN npm install --omit=dev --no-package-lock
