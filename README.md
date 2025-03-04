@@ -1,41 +1,52 @@
-# eBookShelf - Personal eBook Hosting Platform
+# eBookShelf 📚 – Personal eBook Hosting Platform  
+A self-hosted platform for organizing, hosting, and sharing your personal eBook collection. Built with **React, TypeScript, and PocketBase**, it offers a clean UI, secure authentication, and an intuitive reading experience.  
 
-A self-hosted platform for hosting and sharing your personal eBook collection, built with React, TypeScript, and PocketBase.
+## Features  
+✅ **Browse by Category** – Navigate books easily with a responsive UI  
+✅ **In-Browser PDF Reader** – Read PDFs directly without downloads  
+✅ **Admin Dashboard** – Manage books, categories, and users  
+✅ **Upload Support** – Add PDFs and cover images seamlessly  
+✅ **Secure Authentication** – Admin-only access for management  
 
-## Features
+## Tech Stack  
+🖥 **Frontend:** React, TypeScript, Tailwind CSS, Vite  
+⚙ **Backend:** Express server with PocketBase  
+📂 **Database:** PocketBase (embedded database + backend)  
+📖 **PDF Viewer:** `react-pdf`  
+🚀 **Routing:** React Router  
+🎨 **Icons:** Lucide React  
 
-- Browse books by category with a clean, responsive UI
-- Read PDF books directly in the browser
-- Admin dashboard for managing books and categories
-- Upload PDF files and cover images
-- Secure authentication for admin users
+## Deployment  
+eBookShelf is lightweight and easy to deploy using **Docker**.  
 
-## Tech Stack
+```yaml
+services:
+  pocketbase:
+    image: elestio/pocketbase:v0.25.7
+    container_name: pocketbase
+    restart: unless-stopped
+    user: 0:0
+    ports:
+      - "8090:8090"
+    volumes:
+      - ebookshelf:/pb_data
 
-- **Frontend**: React, TypeScript, Tailwind CSS, Vite
-- **Backend**: Express server with PocketBase
-- **Database**: PocketBase (embedded database and backend)
-- **PDF Viewer**: react-pdf
-- **Routing**: React Router
-- **Icons**: Lucide React
+  ebookshelf:
+    image: chanceium/ebookshelf:latest
+    container_name: ebookshelf
+    restart: unless-stopped
+    ports:
+      - "8091:3001"
+    environment:
+      - NODE_ENV=production
 
-## Getting Started
+volumes:
+  ebookshelf:
+```
 
-### Docker Deployment (Recommended)
+## Access  
+- **Admin Panel:** [`http://localhost:8090/_/`](http://localhost:8090/_/)  
+- **eBookShelf UI:** [`http://localhost:8091`](http://localhost:8091)  
 
-1. Clone the repository.
-2. Make sure you have Docker and Docker Compose installed.
-3. Build and start the containers using Docker Compose.
-
-   This will:
-   - Start PocketBase container on port 8090 (external and internal)
-   - Build and start the eBookShelf application on port 8091 (external)
-
-4. Check the PocketBase logs and look for the initial admin setup token. Go to the provided link looks something like `http://your-server-ip:8090/_/###################` and use this URL to create your first admin user.
-5. After logging in to the PocketBase admin UI, import the schema:
-   - Navigate to Settings > Import Collections
-   - Select "Load from JSON" and choose the `pb_schema.json` file from the `/pocketbase` directory
-   - Check the "Merge collections" option
-   - Click "Review" and confirm the import
-
-6. Access your eBookShelf application at `http://your-server-ip:8091`
+## Contributing  
+Contributions and feature suggestions are welcome! Open an issue or PR on [GitHub](https://github.com/chanceium/ebookshelf).  
