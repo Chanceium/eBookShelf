@@ -1,6 +1,6 @@
 services:
   pocketbase:
-    image: elestio/pocketbase:v0.25.7
+    image: chanceium/ebookbase:latest
     container_name: pocketbase
     restart: unless-stopped
     user: 0:0
