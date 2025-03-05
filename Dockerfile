@@ -1,5 +1,5 @@
 # Build stage for React app
-FROM node:20-slim AS build
+FROM node:20-alpine AS build
 
 # Set the working directory
 WORKDIR /app
