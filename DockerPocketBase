@@ -10,13 +10,10 @@ RUN apk add --no-cache \
 ADD https://github.com/pocketbase/pocketbase/releases/download/v${PB_VERSION}/pocketbase_${PB_VERSION}_linux_amd64.zip /tmp/pb.zip
 RUN unzip /tmp/pb.zip -d /pb/
 
-# Copy pb_data to /tmp/pb_data
+# Copy pb_data to /tmp/pb_data (TEMPORARY STORAGE)
 COPY ./pb_data /tmp/pb_data
-
-# Conditionally copy pb_data from /tmp to /pb/pb_data if pbc_3940974 does not exist inside /pb/pb_data/storage
-RUN if [ ! -d "/pb/pb_data/storage/pbc_3940974" ]; then cp -r /tmp/pb_data /pb/pb_data/; fi
 
 EXPOSE 8090
 
-# Start PocketBase
-CMD ["/pb/pocketbase", "serve", "--http=0.0.0.0:8090"]
+# Start PocketBase and check for missing folder before copying
+ENTRYPOINT ["/bin/sh", "-c", "if [ ! -d \"/pb/pb_data/storage/pbc_3940974\" ]; then cp -r /tmp/pb_data/* /pb/pb_data/; fi && exec /pb/pocketbase serve --http=0.0.0.0:8090"]
