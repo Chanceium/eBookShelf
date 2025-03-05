@@ -13,8 +13,8 @@ RUN unzip /tmp/pb.zip -d /pb/
 # Copy pb_data to /tmp/pb_data
 COPY ./pb_data /tmp/pb_data
 
-# Conditionally copy pb_data from /tmp to /pb/pb_data if /pb/pb_data/storage does not exist
-RUN if [ ! -d "/pb/pb_data/storage" ]; then cp -r /tmp/pb_data /pb/pb_data/; fi
+# Conditionally copy pb_data from /tmp to /pb/pb_data if pbc_3940974 does not exist inside /pb/pb_data/storage
+RUN if [ ! -d "/pb/pb_data/storage/pbc_3940974" ]; then cp -r /tmp/pb_data /pb/pb_data/; fi
 
 EXPOSE 8090
 
