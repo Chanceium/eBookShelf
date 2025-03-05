@@ -18,10 +18,11 @@ RUN npm run build
 RUN npm run build:server
 
 # Production stage
-FROM node:20-slim
+FROM node:20-alpine
 
 # Set working directory
 WORKDIR /app
+
 # Copy only the built assets and server files from the build stage
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/dist/server ./dist/server
