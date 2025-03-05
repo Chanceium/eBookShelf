@@ -6,15 +6,17 @@ RUN apk add --no-cache \
     unzip \
     ca-certificates
 
-# download and unzip PocketBase
+# Download and unzip PocketBase
 ADD https://github.com/pocketbase/pocketbase/releases/download/v${PB_VERSION}/pocketbase_${PB_VERSION}_linux_amd64.zip /tmp/pb.zip
 RUN unzip /tmp/pb.zip -d /pb/
 
-COPY ./pb_data /pb_data
-COPY ./pb_data /pb/pb_data
+# Ensure pb_data directory exists
+RUN mkdir -p /pb_data /pb/pb_data
 
+# Copy pb_data only if the target directory is empty
+RUN [ "$(ls -A /pb_data 2>/dev/null)" ] || cp -r /pb_data /pb/pb_data
 
 EXPOSE 8090
 
-# start PocketBase
+# Start PocketBase
 CMD ["/pb/pocketbase", "serve", "--http=0.0.0.0:8090"]
