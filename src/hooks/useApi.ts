@@ -16,18 +16,34 @@ export const useBooks = (page = 1, perPage = 20, filter = '', visibleOnly = true
       
       // Build the filter expression for visibility
       let filterQuery = filter;
+      
+      // PocketBase uses 'true' as a string for boolean filters
       if (visibleOnly) {
-        // Ensure we're using the correct field name and filter syntax for PocketBase
-        filterQuery = filterQuery ? `(${filterQuery}) && visible=true` : 'visible=true';
+        // Correctly format the filter query with PocketBase's syntax
+        filterQuery = filter ? 
+          `(${filter}) && (visible='true' || visible=true)` : 
+          `visible='true' || visible=true`;
+          
+        console.log('Using filter query:', filterQuery); // Debug log
       }
       
-      // Use PocketBase SDK directly instead of fetch for more reliable filtering
+      // Use PocketBase SDK directly
       const result = await pb.collection('books').getList<Book>(page, perPage, {
         filter: filterQuery,
         sort: '-created',
       });
       
-      setBooks(result.items);
+      console.log(`Retrieved ${result.items.length} books with filter: ${filterQuery}`);
+      
+      // Double-check visible status in the results
+      if (visibleOnly) {
+        const visibleBooks = result.items.filter(book => book.visible === true);
+        console.log(`After client filtering: ${visibleBooks.length} visible books`);
+        setBooks(visibleBooks);
+      } else {
+        setBooks(result.items);
+      }
+      
       setTotalItems(result.totalItems);
       setTotalPages(Math.ceil(result.totalItems / perPage));
       setError(null);
