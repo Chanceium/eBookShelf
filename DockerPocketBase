@@ -16,22 +16,23 @@ COPY ./pb_data /tmp/pb_data
 # Create entrypoint script with a 10-second wait before checking storage
 RUN cat <<EOF > /entrypoint.sh
 #!/bin/sh
-set -e  # Exit immediately if a command fails
+echo "Listing contents of current directory:"
+ls -l
+
+echo "Listing contents of /pb directory:"
+ls -l /pb
 
 mkdir -p /pb/pb_data
-echo "Waiting 10 seconds for volume to mount..."
-sleep 10
-
 if [ ! -d "/pb/pb_data/storage" ]; then
   echo "Storage folder missing. Copying pb_data..."
   cp -r /tmp/pb_data/* /pb/pb_data/
-else
-  echo "Storage folder already exists. Skipping copy."
 fi
+
+echo "Listing contents of /pb/pb_data directory:"
+ls -l /pb/pb_data
 
 exec /pb/pocketbase serve --http=0.0.0.0:8090
 EOF
-
 RUN chmod +x /entrypoint.sh
 
 EXPOSE 8090
