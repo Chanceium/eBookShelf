@@ -6,35 +6,14 @@ RUN apk add --no-cache \
     unzip \
     ca-certificates
 
-# Download and unzip PocketBase
+# download and unzip PocketBase
 ADD https://github.com/pocketbase/pocketbase/releases/download/v${PB_VERSION}/pocketbase_${PB_VERSION}_linux_amd64.zip /tmp/pb.zip
 RUN unzip /tmp/pb.zip -d /pb/
 
-# Copy pb_data to /tmp/pb_data (TEMPORARY STORAGE)
-COPY ./pb_data /tmp/pb_data
+COPY ./pb_data /pb/pb_data
 
-# Create entrypoint script with a 10-second wait before checking storage
-RUN cat <<EOF > /entrypoint.sh
-#!/bin/sh
-echo "Listing contents of current directory:"
-ls -l
-
-echo "Listing contents of /pb directory:"
-ls -l /pb
-
-mkdir -p /pb/pb_data
-if [ ! -d "/pb/pb_data/storage" ]; then
-  echo "Storage folder missing. Copying pb_data..."
-  cp -r /tmp/pb_data/* /pb/pb_data/
-fi
-
-echo "Listing contents of /pb/pb_data directory:"
-ls -l /pb/pb_data
-
-exec /pb/pocketbase serve --http=0.0.0.0:8090
-EOF
-RUN chmod +x /entrypoint.sh
 
 EXPOSE 8090
 
-ENTRYPOINT ["/entrypoint.sh"]
+# start PocketBase
+CMD ["/pb/pocketbase", "serve", "--http=0.0.0.0:8090"]
