@@ -13,15 +13,18 @@ RUN unzip /tmp/pb.zip -d /pb/
 # Copy pb_data to /tmp/pb_data (TEMPORARY STORAGE)
 COPY ./pb_data /tmp/pb_data
 
-# Create an entrypoint script
-RUN echo '#!/bin/sh' > /entrypoint.sh && \
-    echo 'mkdir -p /pb/pb_data' >> /entrypoint.sh && \   # Ensure /pb/pb_data exists
-    echo 'if [ ! -d "/pb/pb_data/storage" ]; then' >> /entrypoint.sh && \
-    echo '  echo "Storage folder missing. Copying pb_data..."' >> /entrypoint.sh && \
-    echo '  cp -r /tmp/pb_data/* /pb/pb_data/' >> /entrypoint.sh && \
-    echo 'fi' >> /entrypoint.sh && \
-    echo 'exec /pb/pocketbase serve --http=0.0.0.0:8090' >> /entrypoint.sh && \
-    chmod +x /entrypoint.sh
+# Create entrypoint script
+RUN cat <<EOF > /entrypoint.sh
+#!/bin/sh
+mkdir -p /pb/pb_data
+if [ ! -d "/pb/pb_data/storage" ]; then
+  echo "Storage folder missing. Copying pb_data..."
+  cp -r /tmp/pb_data/* /pb/pb_data/
+fi
+exec /pb/pocketbase serve --http=0.0.0.0:8090
+EOF
+
+RUN chmod +x /entrypoint.sh
 
 EXPOSE 8090
 
