@@ -13,37 +13,36 @@ export const useBooks = (page = 1, perPage = 20, filter = '', visibleOnly = true
   const fetchBooks = useCallback(async () => {
     try {
       setLoading(true);
-      
+
       // Build the filter expression for visibility
       let filterQuery = filter;
-      
+
       // PocketBase uses 'true' as a string for boolean filters
       if (visibleOnly) {
         // Correctly format the filter query with PocketBase's syntax
-        filterQuery = filter ? 
-          `(${filter}) && (visible='true' || visible=true)` : 
-          `visible='true' || visible=true`;
-          
-        console.log('Using filter query:', filterQuery); // Debug log
+        filterQuery = filter
+          ? `${filter} && visible='true'`
+          : `visible='true'`;
       }
-      
+
       // Use PocketBase SDK directly
       const result = await pb.collection('books').getList<Book>(page, perPage, {
         filter: filterQuery,
         sort: '-created',
       });
-      
+
       console.log(`Retrieved ${result.items.length} books with filter: ${filterQuery}`);
       
-      // Double-check visible status in the results
-      if (visibleOnly) {
-        const visibleBooks = result.items.filter(book => book.visible === true);
-        console.log(`After client filtering: ${visibleBooks.length} visible books`);
-        setBooks(visibleBooks);
-      } else {
-        setBooks(result.items);
-      }
+      // Log detailed information about each book
+      console.log('Retrieved books:', result.items.map(book => ({
+        id: book.id,
+        title: book.title,
+        author: book.author,
+        visible: book.visible,
+        // Add other important fields you want to track
+      })));
       
+      setBooks(result.items);
       setTotalItems(result.totalItems);
       setTotalPages(Math.ceil(result.totalItems / perPage));
       setError(null);
@@ -74,7 +73,7 @@ export const useBook = (id: string | undefined) => {
       setLoading(false);
       return;
     }
-    
+
     try {
       setLoading(true);
       // Use PocketBase SDK directly

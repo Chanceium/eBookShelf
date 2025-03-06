@@ -4,7 +4,6 @@ import { getFileUrl } from '../lib/pocketbase';
 
 const BookList = () => {
   const [page, setPage] = useState(1);
-  // The visibleOnly parameter defaults to true, only fetching visible books
   const { books, loading, error, totalPages } = useBooks(page);
   
   if (loading) {
