@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { pb } from '../lib/pocketbase';
 import { Book, Category, SiteSettings, getFileUrl } from '../lib/pocketbase';
-import { Plus, Trash, Edit, BookOpen, FolderPlus, X, Loader2, Settings } from 'lucide-react';
+import { Plus, Trash, Edit, BookOpen, FolderPlus, X, Loader2, Settings, Eye, EyeOff } from 'lucide-react';
 
 const AdminPage: React.FC = () => {
   const navigate = useNavigate();
@@ -439,6 +439,21 @@ const AdminPage: React.FC = () => {
 
   const handleCancelSiteSettings = () => {
     setShowSiteSettingsForm(false);
+  };
+
+  const handleToggleVisibility = async (id: string, currentVisibility: boolean) => {
+    try {
+      await pb.collection('books').update(id, {
+        visible: !currentVisibility
+      });
+      
+      // Update the books list to reflect the change
+      setBooks(books.map(book => 
+        book.id === id ? { ...book, visible: !book.visible } : book
+      ));
+    } catch (err) {
+      console.error('Error toggling book visibility:', err);
+    }
   };
 
   if (loading) {
@@ -1166,6 +1181,13 @@ const AdminPage: React.FC = () => {
                             title="View"
                           >
                             <BookOpen size={16} />
+                          </button>
+                          <button
+                            onClick={() => handleToggleVisibility(book.id, book.visible)}
+                            className={`${book.visible ? 'text-green-600 hover:text-green-900' : 'text-gray-400 hover:text-gray-600'}`}
+                            title={book.visible ? "Set as invisible" : "Set as visible"}
+                          >
+                            {book.visible ? <Eye size={16} /> : <EyeOff size={16} />}
                           </button>
                           <button
                             onClick={() => handleEditBook(book)}

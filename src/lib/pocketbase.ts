@@ -42,6 +42,7 @@ export interface Book {
   isbn: string;
   published_date: Date;
   edition: string;
+  visible: boolean;
   subtitle: string;
   created: string;
   updated: string;

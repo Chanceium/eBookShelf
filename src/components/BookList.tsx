@@ -5,6 +5,9 @@ import { getFileUrl } from '../lib/pocketbase';
 const BookList = () => {
   const [page, setPage] = useState(1);
   const { books, loading, error, totalPages } = useBooks(page);
+  
+  // Filter books to only show visible ones
+  const visibleBooks = books.filter(book => book.visible === true);
 
   if (loading) {
     return <div>Loading books...</div>;
@@ -13,13 +16,17 @@ const BookList = () => {
   if (error) {
     return <div>Error: {error}</div>;
   }
+  
+  if (visibleBooks.length === 0) {
+    return <div>No books available.</div>;
+  }
 
   return (
     <div>
       <h1>Books</h1>
       
       <div className="book-grid">
-        {books.map(book => (
+        {visibleBooks.map(book => (
           <div key={book.id} className="book-card">
             <img 
               src={getFileUrl('books', book.id, book.coverImage)} 
