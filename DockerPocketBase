@@ -13,14 +13,22 @@ RUN unzip /tmp/pb.zip -d /pb/
 # Copy pb_data to /tmp/pb_data (TEMPORARY STORAGE)
 COPY ./pb_data /tmp/pb_data
 
-# Create entrypoint script
+# Create entrypoint script with a 10-second wait before checking storage
 RUN cat <<EOF > /entrypoint.sh
 #!/bin/sh
+set -e  # Exit immediately if a command fails
+
 mkdir -p /pb/pb_data
+echo "Waiting 10 seconds for volume to mount..."
+sleep 10
+
 if [ ! -d "/pb/pb_data/storage" ]; then
   echo "Storage folder missing. Copying pb_data..."
   cp -r /tmp/pb_data/* /pb/pb_data/
+else
+  echo "Storage folder already exists. Skipping copy."
 fi
+
 exec /pb/pocketbase serve --http=0.0.0.0:8090
 EOF
 
