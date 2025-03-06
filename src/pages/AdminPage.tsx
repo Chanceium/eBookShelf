@@ -302,8 +302,8 @@ const AdminPage: React.FC = () => {
     // Show the form
     setShowBookForm(true);
     
-    // Scroll to the form
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Remove automatic scrolling
+    // window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleCancelForm = () => {
@@ -371,9 +371,6 @@ const AdminPage: React.FC = () => {
     }
     
     setShowSiteSettingsForm(true);
-    
-    // Scroll to the form
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSaveSiteSettings = async (e: React.FormEvent) => {
@@ -442,13 +439,15 @@ const AdminPage: React.FC = () => {
       <div className="mb-12">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-xl font-semibold text-gray-800">Site Settings</h2>
-          <button
-            onClick={handleEditSiteSettings}
-            className="inline-flex items-center rounded-md bg-purple-600 px-4 py-2 text-white hover:bg-purple-700"
-          >
-            <Settings size={16} className="mr-2" />
-            Edit Site Settings
-          </button>
+          {!showSiteSettingsForm && (
+            <button
+              onClick={handleEditSiteSettings}
+              className="inline-flex items-center rounded-md bg-purple-600 px-4 py-2 text-white hover:bg-purple-700"
+            >
+              <Settings size={16} className="mr-2" />
+              Edit Site Settings
+            </button>
+          )}
         </div>
         
         {showSiteSettingsForm && (
