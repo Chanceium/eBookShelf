@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Book, Category } from '../lib/pocketbase';
-import pb from '../lib/pocketbase';
+import { pb } from '../lib/pocketbase'; // Fix: Use named import instead of default import
 
 // Hook for fetching books
 export const useBooks = (page = 1, perPage = 20, filter = '', visibleOnly = true) => {
