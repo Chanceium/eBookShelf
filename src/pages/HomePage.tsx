@@ -49,13 +49,16 @@ const HomePage: React.FC = () => {
         setCategories(categoriesData);
       } catch (err: any) {
         console.error('Error fetching initial data:', err);
+      } finally {
+        // Set loading to false after initial data fetch
+        setLoading(false);
+        // Mark initial load as complete
+        isInitialLoad.current = false;
       }
     };
 
     fetchInitialData();
   }, []);
-
-  // No need for a separate useEffect to fetch books - useBooks hook handles that
 
   // Update the error state when booksError changes
   useEffect(() => {
@@ -174,7 +177,7 @@ const HomePage: React.FC = () => {
           onSelectCategory={handleCategorySelect} 
         />
         
-        {/* Replace the loading and content sections with this improved version */}
+        {/* Replace the loading and content sections with this fixed version */}
         <div className="relative min-h-[16rem]">
           {/* Loading spinner with absolute positioning */}
           {(booksLoading && !isInitialLoad.current) && (
@@ -196,18 +199,14 @@ const HomePage: React.FC = () => {
             </div>
           )}
           
-          {/* Error message */}
+          {/* Error message with fixed retry button */}
           {shouldShowError && (
             <div className="rounded-lg bg-red-50 p-4 text-center text-red-800">
               <p>{error}</p>
               <button 
                 onClick={() => {
-                  setBooksLoading(true);
-                  setTimeout(() => {
-                    const currentCategory = selectedCategory;
-                    setSelectedCategory(null);
-                    setTimeout(() => setSelectedCategory(currentCategory), 10);
-                  }, 100);
+                  // Fix: Use refetchBooks instead of nonexistent setBooksLoading
+                  refetchBooks();
                 }} 
                 className="mt-2 rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700"
               >
