@@ -1,12 +1,11 @@
 # eBookShelf 📚 – Personal eBook Hosting Platform  
 A self-hosted platform for organizing, hosting, and sharing your personal eBook collection. Built with **React, TypeScript, and PocketBase**, it offers a clean UI, secure authentication, and an intuitive reading experience.  
-
+## ⚠️ Important ⚠️
+When redeploying the stack or upgrading image versions you must download the backup file from the Admin Dashboard as your data will be overwritten with defaults!  
 ## ⚠️ Important ⚠️  
 **Default Admin Login:**  
 📧 **Email:** `admin@example.com`  
 🔑 **Password:** `examplepassword`
-## ⚠️ Important ⚠️
-When redeploying the stack or upgrading image versions you must download the backup file from the Admin Dashboard as your data will be overwritten with defaults!
 
 🔹 **Change admin credentials immediately!**  
 1. Go to **http://your-ip:8090/_/**  
