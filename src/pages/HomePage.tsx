@@ -4,19 +4,27 @@ import BookCard from '../components/BookCard';
 import CategoryFilter from '../components/CategoryFilter';
 import { Book, Category, SiteSettings, getFileUrl } from '../lib/pocketbase';
 import { Library, BookOpen, GraduationCap, Quote, Loader2 } from 'lucide-react';
+import { useBooks } from '../hooks/useApi'; // Import the useBooks hook
 
 const HomePage: React.FC = () => {
-  const [books, setBooks] = useState<Book[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [booksLoading, setBooksLoading] = useState(true); // Separate loading state for books
   const [error, setError] = useState<string | null>(null);
   const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null);
   const isInitialLoad = useRef(true);
   const abortControllerRef = useRef<AbortController | null>(null);
   const [heroLoading, setHeroLoading] = useState(true);
   const [animateBooks, setAnimateBooks] = useState(false);
+
+  // Use the useBooks hook to fetch books with visibility filter
+  const categoryFilter = selectedCategory ? `category="${selectedCategory}"` : '';
+  const { 
+    books, 
+    loading: booksLoading, 
+    error: booksError,
+    refetch: refetchBooks 
+  } = useBooks(1, 100, categoryFilter, true);
 
   // Fetch site settings and categories when the component mounts
   useEffect(() => {
@@ -47,70 +55,18 @@ const HomePage: React.FC = () => {
     fetchInitialData();
   }, []);
 
-  // Fetch books whenever the selected category changes
+  // No need for a separate useEffect to fetch books - useBooks hook handles that
+
+  // Update the error state when booksError changes
   useEffect(() => {
-    const fetchBooks = async () => {
-      try {
-        // Only update booksLoading for category changes, not initial load
-        if (!isInitialLoad.current) {
-          setBooksLoading(true);
-        } else {
-          setLoading(true);
-        }
-        
-        // Cancel any ongoing requests
-        if (abortControllerRef.current) {
-          abortControllerRef.current.abort();
-        }
-        
-        // Create a new abort controller for this request
-        abortControllerRef.current = new AbortController();
-        
-        // Fetch books with filter if category is selected
-        let booksRequest;
-        if (selectedCategory) {
-          booksRequest = pb.collection('books').getFullList<Book>({
-            filter: `category = "${selectedCategory}"`,
-            sort: '-created',
-            $cancelKey: `books-${selectedCategory}-${Date.now()}`, // Unique cancel key
-          });
-        } else {
-          booksRequest = pb.collection('books').getFullList<Book>({
-            sort: '-created',
-            $cancelKey: `books-all-${Date.now()}`, // Unique cancel key
-          });
-        }
-        
-        const booksData = await booksRequest;
-        setBooks(booksData);
-        setError(null); // Clear any previous errors
-        
-      } catch (err: any) {
-        console.error('Error fetching books:', err);
-        
-        // Only set error if it's not a cancellation
-        if (!err.isAbort) {
-          setError('Failed to load books. Please try again later.');
-        }
-      } finally {
-        // No longer initial load
-        isInitialLoad.current = false;
-        setLoading(false);
-        setBooksLoading(false);
-      }
-    };
+    if (booksError) {
+      setError(booksError);
+    } else {
+      setError(null);
+    }
+  }, [booksError]);
 
-    fetchBooks();
-    
-    // Cleanup function
-    return () => {
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-    };
-  }, [selectedCategory]);
-
-  // Add this new effect to handle animation timing
+  // Handle animation timing
   useEffect(() => {
     // When books finish loading, trigger animation
     if (!booksLoading && !loading) {
