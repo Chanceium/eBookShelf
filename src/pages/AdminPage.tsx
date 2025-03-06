@@ -1174,7 +1174,8 @@ const AdminPage: React.FC = () => {
                         </span>
                       </td>
                       <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
-                        <div className="flex justify-end space-x-2">
+                        {/* Desktop view - regular buttons */}
+                        <div className="hidden md:flex justify-end space-x-2">
                           <button
                             onClick={() => navigate(`/book/${book.id}`)}
                             className="text-blue-600 hover:text-blue-900"
@@ -1203,6 +1204,56 @@ const AdminPage: React.FC = () => {
                           >
                             <Trash size={16} />
                           </button>
+                        </div>
+                        
+                        {/* Mobile view - dropdown menu */}
+                        <div className="md:hidden dropdown-container relative">
+                          <button 
+                            onClick={(e) => {
+                              e.currentTarget.nextElementSibling?.classList.toggle('hidden');
+                            }}
+                            className="p-1.5 bg-gray-100 rounded-full hover:bg-gray-200"
+                            title="Actions"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <circle cx="12" cy="12" r="1" />
+                              <circle cx="12" cy="5" r="1" />
+                              <circle cx="12" cy="19" r="1" />
+                            </svg>
+                          </button>
+                          <div className="hidden absolute right-0 mt-2 w-36 bg-white rounded-md shadow-lg z-10 border border-gray-200">
+                            <div className="py-1" onClick={(e) => e.currentTarget.parentElement?.classList.add('hidden')}>
+                              <button
+                                onClick={() => navigate(`/book/${book.id}`)}
+                                className="flex items-center px-4 py-2 text-sm text-blue-700 hover:bg-blue-100 w-full text-left"
+                              >
+                                <BookOpen size={14} className="mr-2" /> View
+                              </button>
+                              <button
+                                onClick={() => handleToggleVisibility(book.id, book.visible)}
+                                className={`flex items-center px-4 py-2 text-sm w-full text-left ${
+                                  book.visible 
+                                    ? 'text-green-700 hover:bg-green-100' 
+                                    : 'text-gray-700 hover:bg-gray-100'
+                                }`}
+                              >
+                                {book.visible ? <Eye size={14} className="mr-2" /> : <EyeOff size={14} className="mr-2" />}
+                                {book.visible ? "Hide" : "Show"}
+                              </button>
+                              <button
+                                onClick={() => handleEditBook(book)}
+                                className="flex items-center px-4 py-2 text-sm text-amber-700 hover:bg-amber-100 w-full text-left"
+                              >
+                                <Edit size={14} className="mr-2" /> Edit
+                              </button>
+                              <button
+                                onClick={() => handleDeleteBook(book.id)}
+                                className="flex items-center px-4 py-2 text-sm text-red-700 hover:bg-red-100 w-full text-left"
+                              >
+                                <Trash size={14} className="mr-2" /> Delete
+                              </button>
+                            </div>
+                          </div>
                         </div>
                       </td>
                     </tr>
