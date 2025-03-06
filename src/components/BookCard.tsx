@@ -39,6 +39,9 @@ const BookCard: React.FC<BookCardProps> = ({ book }) => {
         </div>
         <div className="p-4">
           <h3 className="mb-1 text-lg font-semibold text-gray-800">{book.title}</h3>
+          {book.subtitle && (
+            <p className="mb-1 text-sm italic text-gray-700">{book.subtitle}</p>
+          )}
           <p className="text-sm text-gray-600">by {book.author}</p>
           <div className="mt-2">
             <span className="inline-block rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800">

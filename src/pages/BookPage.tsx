@@ -188,12 +188,32 @@ const BookPage: React.FC = () => {
         
         <div>
           <h1 className="mb-2 text-3xl font-bold text-gray-800">{book.title}</h1>
+          {book.subtitle && (
+            <p className="mb-3 text-xl italic text-gray-600">{book.subtitle}</p>
+          )}
           <p className="mb-4 text-lg text-gray-600">by {book.author}</p>
           <div className="mb-4">
             <span className="inline-block rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-800">
               {categoryName}
             </span>
           </div>
+          
+          {/* New details section */}
+          <div className="mb-4 grid grid-cols-1 gap-2 text-sm text-gray-700 md:grid-cols-2">
+            {book.isbn && (
+              <p><span className="font-semibold">ISBN:</span> {book.isbn}</p>
+            )}
+            {book.published_date && (
+              <p>
+                <span className="font-semibold">Published:</span>{' '}
+                {new Date(book.published_date).toLocaleDateString()}
+              </p>
+            )}
+            {book.edition && (
+              <p><span className="font-semibold">Edition:</span> {book.edition}</p>
+            )}
+          </div>
+          
           <p className="text-gray-700">{book.description}</p>
           
           <div className="mt-6">

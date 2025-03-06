@@ -41,19 +41,21 @@ const Header: React.FC = () => {
               </Link>
             </li>
             
-            <li>
-              <Link 
-                to="/admin" 
-                className={`flex items-center px-2 py-2 text-base sm:text-sm font-medium ${
-                  location.pathname.startsWith('/admin') 
-                    ? 'text-blue-600' 
-                    : 'text-gray-600 hover:text-blue-600'
-                }`}
-              >
-                <Settings size={18} className="mr-1" />
-                <span className="hidden sm:inline">Admin</span>
-              </Link>
-            </li>
+            {pb.authStore.isValid && (
+              <li>
+                <Link 
+                  to="/admin" 
+                  className={`flex items-center px-2 py-2 text-base sm:text-sm font-medium ${
+                    location.pathname.startsWith('/admin') 
+                      ? 'text-blue-600' 
+                      : 'text-gray-600 hover:text-blue-600'
+                  }`}
+                >
+                  <Settings size={18} className="mr-1" />
+                  <span className="hidden sm:inline">Admin</span>
+                </Link>
+              </li>
+            )}
             
             {!pb.authStore.isValid ? (
               <li>

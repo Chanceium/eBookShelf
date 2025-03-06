@@ -20,6 +20,11 @@ const AdminPage: React.FC = () => {
   const [bookCategory, setBookCategory] = useState('');
   const [bookCover, setBookCover] = useState<File | null>(null);
   const [bookPdf, setBookPdf] = useState<File | null>(null);
+  // New book fields
+  const [bookIsbn, setBookIsbn] = useState('');
+  const [bookPublishedDate, setBookPublishedDate] = useState('');
+  const [bookEdition, setBookEdition] = useState('');
+  const [bookSubtitle, setBookSubtitle] = useState('');
   
   // Edit mode state
   const [editMode, setEditMode] = useState(false);
@@ -96,6 +101,11 @@ const AdminPage: React.FC = () => {
     setBookCategory('');
     setBookCover(null);
     setBookPdf(null);
+    // Reset new fields
+    setBookIsbn('');
+    setBookPublishedDate('');
+    setBookEdition('');
+    setBookSubtitle('');
     setEditMode(false);
     setEditBookId(null);
     setExistingCoverImage('');
@@ -133,6 +143,11 @@ const AdminPage: React.FC = () => {
       formData.append('author', bookAuthor);
       formData.append('description', bookDescription);
       formData.append('category', bookCategory);
+      // Add new fields
+      formData.append('isbn', bookIsbn);
+      formData.append('published_date', bookPublishedDate);
+      formData.append('edition', bookEdition);
+      formData.append('subtitle', bookSubtitle);
       
       if (bookCover) {
         formData.append('coverImage', bookCover);
@@ -298,6 +313,12 @@ const AdminPage: React.FC = () => {
     setBookCategory(book.category);
     setExistingCoverImage(book.coverImage);
     setExistingPdfFile(book.pdfFile);
+    
+    // Set new fields
+    setBookIsbn(book.isbn || '');
+    setBookPublishedDate(book.published_date ? new Date(book.published_date).toISOString().split('T')[0] : '');
+    setBookEdition(book.edition || '');
+    setBookSubtitle(book.subtitle || '');
     
     // Show the form
     setShowBookForm(true);
@@ -803,6 +824,20 @@ const AdminPage: React.FC = () => {
                 </div>
               </div>
               
+              {/* New field: Subtitle */}
+              <div className="mb-4">
+                <label htmlFor="bookSubtitle" className="mb-1 block text-sm font-medium text-gray-700">
+                  Subtitle (optional)
+                </label>
+                <input
+                  id="bookSubtitle"
+                  type="text"
+                  value={bookSubtitle}
+                  onChange={(e) => setBookSubtitle(e.target.value)}
+                  className="block w-full rounded-md border border-gray-300 p-2 focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+                />
+              </div>
+              
               <div className="mb-4">
                 <label htmlFor="bookDescription" className="mb-1 block text-sm font-medium text-gray-700">
                   Description
@@ -815,6 +850,50 @@ const AdminPage: React.FC = () => {
                   rows={3}
                   className="block w-full rounded-md border border-gray-300 p-2 focus:border-blue-500 focus:outline-none focus:ring-blue-500"
                 />
+              </div>
+              
+              <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-3">
+                {/* New field: ISBN */}
+                <div>
+                  <label htmlFor="bookIsbn" className="mb-1 block text-sm font-medium text-gray-700">
+                    ISBN (optional)
+                  </label>
+                  <input
+                    id="bookIsbn"
+                    type="text"
+                    value={bookIsbn}
+                    onChange={(e) => setBookIsbn(e.target.value)}
+                    className="block w-full rounded-md border border-gray-300 p-2 focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+                  />
+                </div>
+                
+                {/* New field: Published Date */}
+                <div>
+                  <label htmlFor="bookPublishedDate" className="mb-1 block text-sm font-medium text-gray-700">
+                    Published Date (optional)
+                  </label>
+                  <input
+                    id="bookPublishedDate"
+                    type="date"
+                    value={bookPublishedDate}
+                    onChange={(e) => setBookPublishedDate(e.target.value)}
+                    className="block w-full rounded-md border border-gray-300 p-2 focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+                  />
+                </div>
+                
+                {/* New field: Edition */}
+                <div>
+                  <label htmlFor="bookEdition" className="mb-1 block text-sm font-medium text-gray-700">
+                    Edition (optional)
+                  </label>
+                  <input
+                    id="bookEdition"
+                    type="text"
+                    value={bookEdition}
+                    onChange={(e) => setBookEdition(e.target.value)}
+                    className="block w-full rounded-md border border-gray-300 p-2 focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+                  />
+                </div>
               </div>
               
               <div className="mb-4">

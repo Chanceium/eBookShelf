@@ -39,6 +39,10 @@ export interface Book {
   category: string;
   coverImage: string;
   pdfFile: string;
+  isbn: string;
+  published_date: Date;
+  edition: string;
+  subtitle: string;
   created: string;
   updated: string;
 }
