@@ -5,7 +5,7 @@ import { Book, Category } from '../lib/pocketbase';
 const API_URL = '/api';
 
 // Hook for fetching books
-export const useBooks = (page = 1, perPage = 20, filter = '') => {
+export const useBooks = (page = 1, perPage = 20, filter = '', visibleOnly = true) => {
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -15,8 +15,14 @@ export const useBooks = (page = 1, perPage = 20, filter = '') => {
   const fetchBooks = useCallback(async () => {
     try {
       setLoading(true);
+      // Add visibility filter to the API request when visibleOnly is true
+      let filterQuery = filter;
+      if (visibleOnly) {
+        filterQuery = filterQuery ? `${filterQuery} && visible=true` : 'visible=true';
+      }
+      
       const response = await fetch(
-        `${API_URL}/books?page=${page}&perPage=${perPage}&filter=${encodeURIComponent(filter)}`
+        `${API_URL}/books?page=${page}&perPage=${perPage}&filter=${encodeURIComponent(filterQuery)}`
       );
       
       if (!response.ok) {
@@ -33,7 +39,7 @@ export const useBooks = (page = 1, perPage = 20, filter = '') => {
     } finally {
       setLoading(false);
     }
-  }, [page, perPage, filter]);
+  }, [page, perPage, filter, visibleOnly]);
 
   useEffect(() => {
     fetchBooks();
