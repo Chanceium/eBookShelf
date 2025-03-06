@@ -1,8 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Book, Category } from '../lib/pocketbase';
-
-// Base URL for the API
-const API_URL = '/api';
+import pb from '../lib/pocketbase';
 
 // Hook for fetching books
 export const useBooks = (page = 1, perPage = 20, filter = '', visibleOnly = true) => {
@@ -15,27 +13,28 @@ export const useBooks = (page = 1, perPage = 20, filter = '', visibleOnly = true
   const fetchBooks = useCallback(async () => {
     try {
       setLoading(true);
-      // Add visibility filter to the API request when visibleOnly is true
+      
+      // Build the filter expression for visibility
       let filterQuery = filter;
       if (visibleOnly) {
-        filterQuery = filterQuery ? `${filterQuery} && visible=true` : 'visible=true';
+        // Ensure we're using the correct field name and filter syntax for PocketBase
+        filterQuery = filterQuery ? `(${filterQuery}) && visible=true` : 'visible=true';
       }
       
-      const response = await fetch(
-        `${API_URL}/books?page=${page}&perPage=${perPage}&filter=${encodeURIComponent(filterQuery)}`
-      );
+      // Use PocketBase SDK directly instead of fetch for more reliable filtering
+      const result = await pb.collection('books').getList<Book>(page, perPage, {
+        filter: filterQuery,
+        sort: '-created',
+      });
       
-      if (!response.ok) {
-        throw new Error('Failed to fetch books');
-      }
-      
-      const data = await response.json();
-      setBooks(data.items);
-      setTotalItems(data.totalItems);
-      setTotalPages(data.totalPages);
+      setBooks(result.items);
+      setTotalItems(result.totalItems);
+      setTotalPages(Math.ceil(result.totalItems / perPage));
       setError(null);
     } catch (err) {
+      console.error('Error fetching books:', err);
       setError(err instanceof Error ? err.message : 'Unknown error');
+      setBooks([]);
     } finally {
       setLoading(false);
     }
@@ -62,17 +61,14 @@ export const useBook = (id: string | undefined) => {
     
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}/books/${id}`);
-      
-      if (!response.ok) {
-        throw new Error('Book not found');
-      }
-      
-      const data = await response.json();
+      // Use PocketBase SDK directly
+      const data = await pb.collection('books').getOne<Book>(id);
       setBook(data);
       setError(null);
     } catch (err) {
+      console.error('Error fetching book:', err);
       setError(err instanceof Error ? err.message : 'Unknown error');
+      setBook(null);
     } finally {
       setLoading(false);
     }
@@ -94,17 +90,14 @@ export const useCategories = () => {
   const fetchCategories = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}/categories`);
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch categories');
-      }
-      
-      const data = await response.json();
-      setCategories(data);
+      // Use PocketBase SDK directly
+      const result = await pb.collection('categories').getFullList<Category>();
+      setCategories(result);
       setError(null);
     } catch (err) {
+      console.error('Error fetching categories:', err);
       setError(err instanceof Error ? err.message : 'Unknown error');
+      setCategories([]);
     } finally {
       setLoading(false);
     }
@@ -119,5 +112,5 @@ export const useCategories = () => {
 
 // Helper function to get file URLs
 export const getFileUrl = (collectionId: string, recordId: string, fileName: string) => {
-  return `${API_URL}/files/${collectionId}/${recordId}/${fileName}`;
+  return pb.getFileUrl({ collectionId, recordId, fileName });
 };
