@@ -13,18 +13,30 @@ export const useBooks = (page = 1, perPage = 20, filter = '', visibleOnly = true
   const fetchBooks = useCallback(async () => {
     try {
       setLoading(true);
-
+      console.log("Starting book fetch with params:", { page, perPage, initialFilter: filter, visibleOnly });
+      
+      // DEBUGGING: First get all books without filtering to verify data
+      const allBooksResult = await pb.collection('books').getList<Book>(1, 100, {
+        sort: '-created',
+      });
+      
+      console.log("Total books in DB:", allBooksResult.items.length);
+      console.log("Books with visible=true:", allBooksResult.items.filter(b => b.visible === true).length);
+      console.log("Books with visible=false:", allBooksResult.items.filter(b => b.visible === false).length);
+      
       // Build the filter expression for visibility
       let filterQuery = filter;
 
       // PocketBase uses 'true' as a string for boolean filters
+      // Fix: PocketBase actually accepts both true (boolean) and 'true' (string)
       if (visibleOnly) {
-        // Correctly format the filter query with PocketBase's syntax
         filterQuery = filter
-          ? `${filter} && visible='true'`
-          : `visible='true'`;
+          ? `${filter} && visible=true`  // Changed from 'true' to true
+          : `visible=true`;              // Changed from 'true' to true
       }
 
+      console.log("Using filter query:", filterQuery);
+      
       // Use PocketBase SDK directly
       const result = await pb.collection('books').getList<Book>(page, perPage, {
         filter: filterQuery,
